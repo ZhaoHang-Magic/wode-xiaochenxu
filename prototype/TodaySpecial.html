@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日特色 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.5);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-container {
+            width: 90%;
+            max-width: 420px;
+            max-height: 85vh;
+            background-color: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            animation: popup 0.3s ease-out;
+        }
+        @keyframes popup {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .popup-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f2f5;
+            position: relative;
+            background-color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .popup-content {
+            padding: 16px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            cursor: pointer;
+        }
+        .dish-card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s;
+        }
+        .dish-card:active {
+            transform: scale(0.98);
+        }
+        .dish-image {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            position: relative;
+        }
+        .dish-content {
+            padding: 16px;
+        }
+        .dish-tag {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .tag-new {
+            background-color: #f56565;
+        }
+        .tag-discount {
+            background-color: #ed8936;
+        }
+        .tag-popular {
+            background-color: #3182ce;
+        }
+        .tag-limited {
+            background-color: #805ad5;
+        }
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .category-tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+        .category-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .category-tab {
+            flex: 0 0 auto;
+            padding: 8px 16px;
+            margin-right: 8px;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: #f0f2f5;
+            color: #666;
+            cursor: pointer;
+        }
+        .category-tab.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .dish-restaurant {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .dish-price {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 12px;
+            margin-left: 4px;
+        }
+        .rating {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <h2 class="text-lg font-bold text-center">今日特色</h2>
+            <div class="close-btn" onclick="parent.changePage('home.html')">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+
+        <div class="category-tabs">
+            <div class="category-tab active">全部</div>
+            <div class="category-tab">主菜</div>
+            <div class="category-tab">前菜</div>
+            <div class="category-tab">甜点</div>
+            <div class="category-tab">饮品</div>
+            <div class="category-tab">今日优惠</div>
+        </div>
+
+        <div class="popup-content">
+            <div class="section-title">主厨推荐</div>
+            
+            <!-- 海鲜拼盘 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1559847844-5315695dadae?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="海鲜拼盘">
+                    <div class="dish-tag tag-new">新品</div>
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">海鲜拼盘</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>大洋主厨餐厅 (8层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        特选新鲜龙虾、生蚝、帝王蟹和各式海鲜，配以特调酱料，展现大海的原始风味。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥358</span>
+                            <span class="original-price">¥398</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 松露牛排 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="松露牛排">
+                    <div class="dish-tag tag-popular">热卖</div>
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">松露牛排</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.8</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>法式餐厅 (7层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        精选澳洲M9和牛，配以意大利进口黑松露，48小时慢煎，口感嫩滑多汁。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥388</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">特色甜品</div>
+
+            <!-- 巧克力熔岩蛋糕 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1511911063855-2bf39afa5b2e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="巧克力熔岩蛋糕">
+                    <div class="dish-tag tag-discount">优惠</div>
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">巧克力熔岩蛋糕</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.7</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>甜品工坊 (6层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        使用比利时进口巧克力制作，蛋糕外酥内软，切开时流心效果完美呈现，搭配香草冰淇淋。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥68</span>
+                            <span class="original-price">¥88</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 提拉米苏 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1571877227200-a0d98ea607e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="提拉米苏">
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">提拉米苏</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.6</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>咖啡厅 (5层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        经典意式甜点，采用马斯卡彭奶酪和特调浓缩咖啡，层次丰富，口感绵密。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥58</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">精选饮品</div>
+
+            <!-- 特调鸡尾酒 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="特调鸡尾酒">
+                    <div class="dish-tag tag-limited">限时</div>
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">蓝色珊瑚礁</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.9</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>星空酒吧 (顶层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        以优质伏特加为基酒，混合蓝柑橘利口酒、蓝莓汁和新鲜柠檬，加入少量气泡水，口感清爽。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥78</span>
+                            <span class="original-price">¥98</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 热带风情 -->
+            <div class="dish-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1536935338788-846bb9981813?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="dish-image" alt="热带风情">
+                    <div class="dish-tag tag-new">新品</div>
+                </div>
+                <div class="dish-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">莓果莫吉托</h3>
+                        <div class="rating">
+                            <i class="fas fa-star text-yellow-400 mr-1"></i>
+                            <span>4.7</span>
+                        </div>
+                    </div>
+                    <div class="dish-restaurant">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>海洋酒吧 (7层)</span>
+                    </div>
+                    <p class="text-sm text-gray-600 my-2">
+                        经典莫吉托的创新版本，加入新鲜草莓、蓝莓、覆盆子，口感更加清新甜美，适合不喜欢烈酒的客人。
+                    </p>
+                    <div class="dish-price">
+                        <div>
+                            <span class="text-red-600 font-bold">¥68</span>
+                        </div>
+                        <button class="bg-blue-500 text-white text-xs py-1 px-3 rounded-full">
+                            立即预订
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 分类标签点击效果
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.category-tab');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

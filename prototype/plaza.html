@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>邮轮美食 - 广场</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            padding-bottom: 60px;
+        }
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 15px;
+            background-color: white;
+        }
+        .main-content {
+            padding-bottom: 70px;
+        }
+        .segmented-control {
+            display: flex;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+        .segment {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .segment.active {
+            background-color: white;
+            color: #0066ff;
+            font-weight: 500;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .card {
+            background-color: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .post-img {
+            width: 100%;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eee;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            background-color: white;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            height: 56px;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: #f0f2f5;
+            color: #555;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .tag.active {
+            background-color: #e6f4ff;
+            color: #0d6efd;
+        }
+        .story-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, #fd5949, #d6249f, #285AEB);
+        }
+        .story-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background-color: white;
+            padding: 2px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .story-img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 顶部导航栏 -->
+    <div class="p-4 flex justify-between items-center">
+        <div class="flex items-center">
+            <span class="text-lg font-bold text-black">邮轮美食</span>
+            <span class="text-xs bg-blue-100 text-blue-600 ml-2 px-2 py-0.5 rounded-full">Deck 7</span>
+        </div>
+        <div class="flex">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-2 relative">
+                <i class="fas fa-bell text-gray-500"></i>
+                <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-4 h-4 flex items-center justify-center rounded-full">3</span>
+            </div>
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-2">
+                <i class="fas fa-qrcode text-gray-500"></i>
+            </div>
+            <div class="w-8 h-8 bg-cover bg-center rounded-full" style="background-image: url('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80')"></div>
+        </div>
+    </div>
+
+    <!-- 分段控制器 -->
+    <div class="px-4">
+        <div class="segmented-control">
+            <div class="segment">首页</div>
+            <div class="segment active">广场</div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content px-4">
+        <!-- 热门活动展示 -->
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold">热门活动</h3>
+                <div class="text-blue-500 text-xs">全部 <i class="fas fa-chevron-right text-xs"></i></div>
+            </div>
+            <div class="flex space-x-3 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <div class="flex-shrink-0 w-48 rounded-lg overflow-hidden relative">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-48 h-28 object-cover" alt="法式烹饪课">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                        <div class="text-white text-xs font-medium">法式烹饪课</div>
+                        <div class="text-white text-xs opacity-80">今日 14:00-16:00</div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 w-48 rounded-lg overflow-hidden relative">
+                    <img src="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-48 h-28 object-cover" alt="美食节">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                        <div class="text-white text-xs font-medium">夏日美食节</div>
+                        <div class="text-white text-xs opacity-80">6月10日-6月20日</div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 w-48 rounded-lg overflow-hidden relative">
+                    <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-48 h-28 object-cover" alt="品酒会">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                        <div class="text-white text-xs font-medium">夜间品酒会</div>
+                        <div class="text-white text-xs opacity-80">明日 20:00-22:00</div>
+                    </div>
+                </div>
+                <div class="flex-shrink-0 w-48 rounded-lg overflow-hidden relative">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-48 h-28 object-cover" alt="早午餐特辑">
+                    <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-2">
+                        <div class="text-white text-xs font-medium">周末早午餐特辑</div>
+                        <div class="text-white text-xs opacity-80">每周六日 9:00-11:00</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 美食故事 -->
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold">美食故事</h3>
+                <div class="text-blue-500 text-xs">全部 <i class="fas fa-chevron-right text-xs"></i></div>
+            </div>
+            <div class="flex space-x-4 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <div class="flex flex-col items-center">
+                    <div class="story-circle">
+                        <div class="story-inner">
+                            <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="story-img" alt="用户头像">
+                        </div>
+                    </div>
+                    <div class="text-xs mt-1">林小厨</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="story-circle">
+                        <div class="story-inner">
+                            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="story-img" alt="用户头像">
+                        </div>
+                    </div>
+                    <div class="text-xs mt-1">美食家</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="story-circle">
+                        <div class="story-inner">
+                            <img src="https://images.unsplash.com/photo-1548142813-c348350df52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="story-img" alt="用户头像">
+                        </div>
+                    </div>
+                    <div class="text-xs mt-1">甜点控</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="story-circle">
+                        <div class="story-inner">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="story-img" alt="用户头像">
+                        </div>
+                    </div>
+                    <div class="text-xs mt-1">海鲜狂</div>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="story-circle">
+                        <div class="story-inner">
+                            <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="story-img" alt="用户头像">
+                        </div>
+                    </div>
+                    <div class="text-xs mt-1">品酒师</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 美食话题标签 -->
+        <div class="mb-4">
+            <div class="flex flex-wrap">
+                <div class="tag active">#邮轮美食</div>
+                <div class="tag">#晚餐推荐</div>
+                <div class="tag">#甜点控</div>
+                <div class="tag">#海鲜盛宴</div>
+                <div class="tag">#品酒体验</div>
+                <div class="tag">#厨师秀</div>
+                <div class="tag">#烹饪课堂</div>
+            </div>
+        </div>
+
+        <!-- 美食动态 -->
+        <div class="card p-4 mb-4">
+            <div class="flex items-start">
+                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="avatar mr-3" alt="用户头像">
+                <div class="flex-grow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-medium">Sarah Wang</div>
+                            <div class="text-xs text-gray-500">30分钟前 · 法餐厅</div>
+                        </div>
+                        <div class="text-blue-500">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-sm">今天在法餐厅尝试了主厨推荐的松露牛排，味道简直难以形容的美妙！ #邮轮美食 #晚餐推荐</p>
+                        <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="post-img mt-2 h-48" alt="松露牛排">
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="flex items-center">
+                                <div class="flex items-center mr-4">
+                                    <i class="fas fa-heart text-red-500 mr-1"></i>
+                                    <span class="text-xs text-gray-600">128</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-comment text-gray-400 mr-1"></i>
+                                    <span class="text-xs text-gray-600">42</span>
+                                </div>
+                            </div>
+                            <div>
+                                <i class="fas fa-share-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 高赞评论 -->
+                        <div class="mt-3 bg-gray-50 p-2 rounded-lg">
+                            <div class="text-xs text-gray-500 mb-1">热门评论</div>
+                            <div class="flex items-start">
+                                <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="w-6 h-6 rounded-full mr-2" alt="评论用户头像">
+                                <div class="flex-grow">
+                                    <div class="text-xs font-medium">Jessica Lin</div>
+                                    <div class="text-xs">我也尝试过，确实美味！主厨的手艺太赞了，酱汁搭配得恰到好处。</div>
+                                    <div class="flex items-center mt-1">
+                                        <div class="text-gray-400 text-xs mr-2">10分钟前</div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-heart text-red-500 text-xs mr-1"></i>
+                                            <span class="text-xs text-gray-500">24</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card p-4 mb-4">
+            <div class="flex items-start">
+                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="avatar mr-3" alt="用户头像">
+                <div class="flex-grow">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="font-medium">Michael Chen</div>
+                            <div class="text-xs text-gray-500">2小时前 · 星空酒吧</div>
+                        </div>
+                        <div class="text-blue-500">
+                            <i class="fas fa-ellipsis-h"></i>
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-sm">星空酒吧的调酒师太厉害了，这款蓝色珊瑚礁鸡尾酒不仅好看，喝起来也是层次分明！强烈推荐！ #品酒体验</p>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="post-img h-36" alt="鸡尾酒">
+                            <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="post-img h-36" alt="星空酒吧">
+                        </div>
+                        <div class="flex justify-between items-center mt-3">
+                            <div class="flex items-center">
+                                <div class="flex items-center mr-4">
+                                    <i class="fas fa-heart text-gray-400 mr-1"></i>
+                                    <span class="text-xs text-gray-600">76</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-comment text-gray-400 mr-1"></i>
+                                    <span class="text-xs text-gray-600">23</span>
+                                </div>
+                            </div>
+                            <div>
+                                <i class="fas fa-share-alt text-gray-400"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- 高赞评论 -->
+                        <div class="mt-3 bg-gray-50 p-2 rounded-lg">
+                            <div class="text-xs text-gray-500 mb-1">热门评论</div>
+                            <div class="flex items-start">
+                                <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="w-6 h-6 rounded-full mr-2" alt="评论用户头像">
+                                <div class="flex-grow">
+                                    <div class="text-xs font-medium">Sarah Wang</div>
+                                    <div class="text-xs">那个调酒师是David吧？他调的每一款鸡尾酒都很惊艳，值得每晚都去尝试不同的！</div>
+                                    <div class="flex items-center mt-1">
+                                        <div class="text-gray-400 text-xs mr-2">1小时前</div>
+                                        <div class="flex items-center">
+                                            <i class="fas fa-heart text-red-500 text-xs mr-1"></i>
+                                            <span class="text-xs text-gray-500">18</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 邮轮美食地图 -->
+        <div class="card p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <h3 class="font-semibold">邮轮美食地图</h3>
+                <div class="text-blue-500 text-xs" onclick="parent.changePage('CruiseShipFoodMap.html')">查看地图 <i class="fas fa-chevron-right text-xs"></i></div>
+            </div>
+            <div class="relative">
+                <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-40 object-cover rounded-lg" alt="邮轮平面图">
+                <div class="absolute top-2 left-2 bg-white bg-opacity-80 rounded-lg px-2 py-1 text-xs">
+                    <div class="font-medium">热门打卡点</div>
+                    <div class="text-gray-500 mt-1">已标记 15 个美食地点</div>
+                </div>
+                <div class="absolute top-1/4 left-1/3 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                    <i class="fas fa-utensils text-white text-xs"></i>
+                </div>
+                <div class="absolute top-1/2 right-1/3 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center animate-pulse">
+                    <i class="fas fa-glass-martini-alt text-white text-xs"></i>
+                </div>
+                <div class="absolute bottom-1/4 left-1/2 w-6 h-6 bg-yellow-500 rounded-full flex items-center justify-center animate-pulse">
+                    <i class="fas fa-ice-cream text-white text-xs"></i>
+                </div>
+            </div>
+            <div class="flex mt-3 justify-between">
+                <div class="flex items-center text-xs">
+                    <i class="fas fa-utensils text-red-500 mr-1"></i>
+                    <span>餐厅 (8)</span>
+                </div>
+                <div class="flex items-center text-xs">
+                    <i class="fas fa-glass-martini-alt text-blue-500 mr-1"></i>
+                    <span>酒吧 (5)</span>
+                </div>
+                <div class="flex items-center text-xs">
+                    <i class="fas fa-ice-cream text-yellow-500 mr-1"></i>
+                    <span>甜品店 (2)</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="tab-icon fas fa-home"></i>
+            <div>首页</div>
+        </div>
+        <div class="tab-item active">
+            <i class="tab-icon fas fa-compass"></i>
+            <div>发现</div>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-clipboard-list"></i>
+            <div>订单</div>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-user"></i>
+            <div>我的</div>
+        </div>
+    </div>
+</body>
+</html> 

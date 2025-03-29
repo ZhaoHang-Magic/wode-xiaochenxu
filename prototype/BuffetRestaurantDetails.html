@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自助餐厅详情 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .badge-free {
+            background-color: #e6f7ff;
+            color: #0d6efd;
+        }
+        .badge-crowded {
+            background-color: #fff3e6;
+            color: #fa8c16;
+        }
+        .badge-unlimited {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .gallery-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .gallery-thumbnail.active {
+            border: 2px solid #0d6efd;
+        }
+        .food-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 16px 0;
+        }
+        .food-card {
+            display: inline-block;
+            width: 140px;
+            margin-right: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .food-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        .menu-category {
+            padding: 10px 16px;
+            background-color: #f7f8fa;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            border-left: 3px solid #0d6efd;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .nav-tab {
+            padding: 12px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .nav-tab.active {
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .realtime-indicator {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #e6f7ff;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .realtime-progress {
+            height: 100%;
+            background-color: #0d6efd;
+            border-radius: 4px;
+            width: 70%;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 餐厅封面图 -->
+    <div class="relative">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-60 object-cover" alt="自助餐厅封面">
+        <div class="absolute top-4 left-4">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center" onclick="window.history.back()">
+                <i class="fas fa-chevron-left text-white"></i>
+            </div>
+        </div>
+        <div class="absolute top-4 right-4 flex">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center mr-2">
+                <i class="fas fa-share-alt text-white"></i>
+            </div>
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center">
+                <i class="far fa-heart text-white"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="main-content bg-white">
+        <!-- 餐厅基本信息 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-xl font-medium">奇迹花园自助餐厅</h1>
+                    <div class="flex items-center mt-1">
+                        <div class="flex text-yellow-400 text-sm">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-gray-500 text-sm ml-1">4.6 (482条点评)</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <div class="flex mb-1">
+                        <span class="badge badge-free">免费自助</span>
+                        <span class="badge badge-unlimited">无限畅食</span>
+                    </div>
+                    <span class="text-xs text-gray-500">5层 · 中部</span>
+                </div>
+            </div>
+            
+            <!-- 营业时间和特色 -->
+            <div class="mt-3">
+                <div class="flex items-center text-gray-500 text-sm">
+                    <i class="far fa-clock mr-2"></i>
+                    <span><span class="font-medium">全天候供应</span> · 06:30-22:30 不间断</span>
+                </div>
+                <div class="flex items-center text-gray-500 text-sm mt-1">
+                    <i class="fas fa-utensils mr-2"></i>
+                    <span>国际自助餐 · 超过200种菜品</span>
+                </div>
+            </div>
+            
+            <!-- 实时就餐情况 -->
+            <div class="mt-4 bg-blue-50 p-3 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <div class="text-sm font-medium text-gray-700">实时就餐情况</div>
+                    <div class="text-xs text-blue-500 font-medium">当前: 312人</div>
+                </div>
+                <div class="realtime-indicator">
+                    <div class="realtime-progress"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500">
+                    <span>正常</span>
+                    <span>较拥挤</span>
+                    <span>拥挤</span>
+                </div>
+                <div class="mt-2 text-xs text-gray-600">
+                    <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                    <span>无需预约，可随时就餐，高峰期可能需要等待</span>
+                </div>
+            </div>
+            
+            <!-- AR导航按钮 -->
+            <div class="mt-4">
+                <div class="bg-green-500 text-white px-4 py-2 rounded-full text-center" onclick="window.location.href='ARNavigation.html'">
+                    <i class="fas fa-map-marked-alt mr-1"></i> AR导航
+                </div>
+            </div>
+        </div>
+        
+        <!-- 美食展示 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-medium">精选美食</h2>
+                <a href="#" class="text-sm text-blue-500">查看全部 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+            
+            <div class="food-scroll">
+                <div class="food-card">
+                    <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="food-img" alt="海鲜拼盘">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">海鲜拼盘</div>
+                        <div class="text-xs text-gray-500 mt-1">鲜活冰镇</div>
+                    </div>
+                </div>
+                
+                <div class="food-card">
+                    <img src="https://images.unsplash.com/photo-1546549032-9571cd6b27df?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="food-img" alt="法式甜点">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">法式甜点</div>
+                        <div class="text-xs text-gray-500 mt-1">当日现烤</div>
+                    </div>
+                </div>
+                
+                <div class="food-card">
+                    <img src="https://images.unsplash.com/photo-1555126634-323283e090fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="food-img" alt="牛排档口">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">牛排档口</div>
+                        <div class="text-xs text-gray-500 mt-1">现切现煎</div>
+                    </div>
+                </div>
+                
+                <div class="food-card">
+                    <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="food-img" alt="亚洲风味">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">亚洲风味</div>
+                        <div class="text-xs text-gray-500 mt-1">地道口味</div>
+                    </div>
+                </div>
+                
+                <div class="food-card">
+                    <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="food-img" alt="意面站">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">意面站</div>
+                        <div class="text-xs text-gray-500 mt-1">现煮定制</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 餐厅介绍 -->
+        <div class="p-4 border-b">
+            <h2 class="text-lg font-medium mb-2">餐厅介绍</h2>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                奇迹花园自助餐厅是邮轮上最大的自助餐厅，提供全天候不间断供应的国际美食。餐厅汇集了全球各地的特色菜肴，包括新鲜海鲜、现切牛排、手工意面、亚洲特色和精致甜点等超过200种菜品。特别设有儿童美食区和特殊饮食需求区域，满足不同客人的需求。开放式厨房让您可以欣赏大厨的精湛烹饪技艺，边用餐边欣赏壮阔海景。
+            </p>
+            
+            <!-- 特色标签 -->
+            <div class="flex flex-wrap mt-3">
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-utensils mr-1 text-blue-500"></i>
+                    <span>国际美食</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-wine-glass-alt mr-1 text-blue-500"></i>
+                    <span>免费饮料</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-ice-cream mr-1 text-blue-500"></i>
+                    <span>甜品区</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-child mr-1 text-blue-500"></i>
+                    <span>儿童友好</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-wheelchair mr-1 text-blue-500"></i>
+                    <span>无障碍设施</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 餐厅照片 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-medium">餐厅照片</h2>
+                <a href="#" class="text-sm text-blue-500">更多照片 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+            
+            <div class="grid grid-cols-3 gap-2">
+                <img src="https://images.unsplash.com/photo-1552566626-52f8b828add9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg" alt="餐厅内部1">
+                <img src="https://images.unsplash.com/photo-1592861956120-e524fc739696?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg" alt="餐厅内部2">
+                <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="w-full h-24 object-cover rounded-lg" alt="餐厅内部3">
+            </div>
+        </div>
+        
+        <!-- 用户评价 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-medium">用户评价</h2>
+                <a href="#" class="text-sm text-blue-500">查看全部482条 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+            
+            <div class="mb-4 pb-4 border-b border-gray-100">
+                <div class="flex items-start">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="avatar mr-3" alt="用户头像">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <div class="font-medium text-sm">李女士</div>
+                            <div class="text-xs text-gray-500">2天前</div>
+                        </div>
+                        <div class="flex text-yellow-400 text-xs mt-1">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">
+                            食物种类非常丰富，尤其是海鲜区的龙虾和生蚝特别新鲜。甜品区也很赞，那个巧克力喷泉绝对是孩子们的最爱！服务人员态度很好，随时补充食材，用餐环境也很舒适。
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-4 pb-4 border-b border-gray-100">
+                <div class="flex items-start">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="avatar mr-3" alt="用户头像">
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <div class="font-medium text-sm">王先生</div>
+                            <div class="text-xs text-gray-500">1周前</div>
+                        </div>
+                        <div class="flex text-yellow-400 text-xs mt-1">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-2">
+                            菜品种类很多，口味适中，适合大众。牛排窗口可以现点现做，非常新鲜。唯一的缺点是高峰期人比较多，需要排队一会儿。建议避开高峰期前往，体验会更好。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 餐厅位置 -->
+        <div class="p-4">
+            <h2 class="text-lg font-medium mb-3">餐厅位置</h2>
+            <div class="relative rounded-lg overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1577979749830-f1d742b96791?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-48 object-cover" alt="餐厅位置图">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-map-marker-alt mr-1"></i> 5层中部
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-3">
+                <button class="flex-1 bg-blue-500 text-white py-2 rounded-lg mr-2 flex items-center justify-center">
+                    <i class="fas fa-map-marked-alt mr-1"></i> 查看位置
+                </button>
+                <button class="flex-1 bg-white border border-blue-500 text-blue-500 py-2 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-directions mr-1"></i> 导航前往
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部标签栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='home.html'">
+            <div class="tab-icon"><i class="fas fa-home"></i></div>
+            <div>首页</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='plaza.html'">
+            <div class="tab-icon"><i class="fas fa-compass"></i></div>
+            <div>广场</div>
+        </div>
+        <div class="tab-item active" onclick="window.location.href='discover.html'">
+            <div class="tab-icon"><i class="fas fa-search"></i></div>
+            <div>发现</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='order.html'">
+            <div class="tab-icon"><i class="fas fa-receipt"></i></div>
+            <div>订单</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <div class="tab-icon"><i class="fas fa-user"></i></div>
+            <div>我的</div>
+        </div>
+    </div>
+</body>
+</html> 

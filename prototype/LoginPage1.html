@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 爱达·魔都号</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .main-content {
+            min-height: calc(100vh - 44px);
+            display: flex;
+            flex-direction: column;
+        }
+        .app-logo {
+            width: 120px;
+            height: 120px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1a73e8, #0d47a1);
+            position: relative;
+            overflow: hidden;
+        }
+        .app-logo .ship-icon {
+            color: white;
+            font-size: 60px;
+            position: relative;
+            z-index: 2;
+        }
+        .app-logo .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 100%;
+            animation: wave 3s infinite ease-in-out;
+        }
+        .app-logo .wave:nth-child(2) {
+            bottom: 5px;
+            animation-delay: 0.5s;
+            opacity: 0.6;
+        }
+        .app-logo .wave:nth-child(3) {
+            bottom: 10px;
+            animation-delay: 1s;
+            opacity: 0.4;
+        }
+        @keyframes wave {
+            0%, 100% {
+                transform: translateY(0) scale(1.2, 1);
+            }
+            50% {
+                transform: translateY(-5px) scale(1.1, 1.1);
+            }
+        }
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .custom-checkbox {
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            border: 2px solid #ddd;
+            display: inline-block;
+            position: relative;
+            transition: all 0.2s;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .custom-checkbox.checked {
+            background-color: #1a73e8;
+            border-color: #1a73e8;
+        }
+        .custom-checkbox.checked:after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+        .bg-ship {
+            background-image: url('https://images.unsplash.com/photo-1599640842225-85d111c60e6b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            opacity: 0.08;
+            z-index: -1;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 背景图 -->
+    <div class="bg-ship"></div>
+
+    <!-- 语言选择器 -->
+    <div class="language-selector">
+        <span class="mr-2 font-medium">中文</span>
+        <i class="fas fa-globe text-blue-500 mx-1"></i>
+        <span class="ml-2">English</span>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <div class="main-content p-6">
+        <div class="flex-1 flex flex-col justify-center items-center">
+            <!-- Logo -->
+            <div class="app-logo mb-6">
+                <i class="fas fa-ship ship-icon"></i>
+                <div class="wave"></div>
+                <div class="wave"></div>
+                <div class="wave"></div>
+            </div>
+            
+            <!-- 欢迎文字 -->
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-gray-800 mb-1">爱达·魔都号</h1>
+                <h2 class="text-lg text-gray-600">AIDAmondo</h2>
+                <p class="text-sm text-gray-500 mt-2">邮轮餐饮与生活服务</p>
+                <p class="text-xs text-gray-400">Cruise Dining & Lifestyle Services</p>
+            </div>
+            
+            <!-- 继续按钮 -->
+            <div class="w-full max-w-sm">
+                <button id="continueBtn" class="w-full py-3 bg-blue-500 text-white font-medium rounded-lg mb-4" onclick="goToNextPage()">
+                    继续 Continue
+                </button>
+                
+                <div class="text-center text-xs text-gray-500">
+                    <p>开启您的海上旅程</p>
+                    <p>Start your journey at sea</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部图片装饰 -->
+        <div class="mt-auto pt-8">
+            <div class="w-full h-16 bg-contain bg-no-repeat bg-center" style="background-image: url('https://images.unsplash.com/photo-1548574505-5e239809ee19?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');"></div>
+        </div>
+    </div>
+
+    <script>
+        function goToNextPage() {
+            window.location.href = 'LoginPage2.html';
+        }
+    </script>
+</body>
+</html> 

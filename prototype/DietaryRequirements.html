@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>饮食需求 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #303133;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+        .section-title i {
+            margin-right: 8px;
+            color: #0d6efd;
+        }
+        .preference-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            background-color: #f5f5f5;
+            color: #303133;
+            border: 1px solid transparent;
+        }
+        .preference-tag.active {
+            background-color: #e6f7ff;
+            color: #1890ff;
+            border: 1px solid #91d5ff;
+        }
+        .allergen-tag {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            background-color: #f5f5f5;
+            color: #303133;
+            border: 1px solid transparent;
+        }
+        .allergen-tag.active {
+            background-color: #fff2e8;
+            color: #fa541c;
+            border: 1px solid #ffbb96;
+        }
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #f0f0f0;
+            outline: none;
+            opacity: 0.7;
+            -webkit-transition: .2s;
+            transition: opacity .2s;
+        }
+        .slider:hover {
+            opacity: 1;
+        }
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1890ff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #1890ff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .water-reminder {
+            border-radius: 12px;
+            background: linear-gradient(135deg, #1890ff, #096dd9);
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+        .water-icon {
+            position: absolute;
+            bottom: -20px;
+            right: -10px;
+            font-size: 100px;
+            opacity: 0.1;
+            transform: rotate(-15deg);
+        }
+        .cup-icon {
+            font-size: 24px;
+            color: #1890ff;
+        }
+        .cup-icon.filled {
+            color: #40a9ff;
+        }
+        .custom-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #d9d9d9;
+            display: inline-block;
+            position: relative;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .custom-checkbox.checked {
+            background-color: #1890ff;
+            border-color: #1890ff;
+        }
+        .custom-checkbox.checked:after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题栏 -->
+    <div class="bg-white px-4 py-3 border-b border-gray-200">
+        <div class="flex items-center">
+            <div class="w-8 h-8 flex items-center justify-center" onclick="window.history.back()">
+                <i class="fas fa-chevron-left text-gray-500"></i>
+            </div>
+            <h1 class="text-lg font-medium text-center flex-1">饮食需求</h1>
+            <div class="w-8 h-8 flex items-center justify-center" id="saveButton">
+                <i class="fas fa-check text-blue-500"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content p-4">
+        <!-- 饮食偏好 -->
+        <div class="card">
+            <div class="p-4 border-b">
+                <div class="section-title">
+                    <i class="fas fa-utensils"></i> 饮食偏好
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="flex flex-wrap">
+                    <div class="preference-tag active" onclick="toggleTag(this)">素食主义 <i class="fas fa-leaf ml-1"></i></div>
+                    <div class="preference-tag" onclick="toggleTag(this)">纯素食 <i class="fas fa-seedling ml-1"></i></div>
+                    <div class="preference-tag" onclick="toggleTag(this)">海鲜 <i class="fas fa-fish ml-1"></i></div>
+                    <div class="preference-tag" onclick="toggleTag(this)">无麸质 <i class="fas fa-ban ml-1"></i></div>
+                    <div class="preference-tag" onclick="toggleTag(this)">地中海式 <i class="fas fa-pizza-slice ml-1"></i></div>
+                    <div class="preference-tag" onclick="toggleTag(this)">亚洲料理 <i class="fas fa-drumstick-bite ml-1"></i></div>
+                    <div class="preference-tag active" onclick="toggleTag(this)">低糖饮食 <i class="fas fa-cookie-bite ml-1"></i></div>
+                    <div class="preference-tag active" onclick="toggleTag(this)">低盐饮食 <i class="fas fa-grip-lines ml-1"></i></div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex items-center border rounded-lg p-2">
+                        <i class="fas fa-plus-circle text-blue-500 mr-2"></i>
+                        <input type="text" placeholder="添加自定义饮食偏好" class="flex-1 outline-none text-sm">
+                        <button class="text-blue-500 text-sm">添加</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 过敏原 -->
+        <div class="card">
+            <div class="p-4 border-b">
+                <div class="section-title">
+                    <i class="fas fa-allergies"></i> 过敏原
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="flex flex-wrap">
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">花生 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag active" onclick="toggleAllergen(this)">贝类 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">蛋类 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag active" onclick="toggleAllergen(this)">乳制品 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">坚果 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">小麦 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">鱼类 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                    <div class="allergen-tag" onclick="toggleAllergen(this)">大豆 <i class="fas fa-exclamation-circle ml-1"></i></div>
+                </div>
+                
+                <div class="mt-4">
+                    <div class="flex items-center border rounded-lg p-2">
+                        <i class="fas fa-plus-circle text-orange-500 mr-2"></i>
+                        <input type="text" placeholder="添加自定义过敏原" class="flex-1 outline-none text-sm">
+                        <button class="text-orange-500 text-sm">添加</button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center bg-yellow-50 p-3 rounded-lg mt-4 text-sm text-yellow-800">
+                    <i class="fas fa-info-circle mr-2 text-yellow-500"></i>
+                    <div>过敏原信息将用于指导我们的厨师为您准备安全的食物。请确保列出所有可能导致您过敏的食材。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 卡路里控制 -->
+        <div class="card">
+            <div class="p-4 border-b">
+                <div class="section-title">
+                    <i class="fas fa-fire"></i> 卡路里控制
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-medium">启用卡路里控制</div>
+                    <label class="switch">
+                        <div class="custom-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                    </label>
+                </div>
+                
+                <div>
+                    <div class="text-gray-700 mb-1">每日卡路里目标</div>
+                    <div class="flex items-center justify-between">
+                        <div class="text-2xl font-medium text-blue-600">1800</div>
+                        <div class="text-sm text-gray-500">千卡/天</div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <input type="range" min="1200" max="3000" value="1800" class="slider" id="calorieSlider" oninput="updateCalories(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>1200</span>
+                            <span>2100</span>
+                            <span>3000</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 border-t pt-4">
+                    <div class="text-gray-700 mb-3">每餐分配建议</div>
+                    <div class="flex justify-between">
+                        <div class="text-center">
+                            <div class="text-lg font-medium">540</div>
+                            <div class="text-xs text-gray-500">早餐 (30%)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-medium">720</div>
+                            <div class="text-xs text-gray-500">午餐 (40%)</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-lg font-medium">540</div>
+                            <div class="text-xs text-gray-500">晚餐 (30%)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    <div>您的卡路里目标将帮助我们为您推荐合适的餐点，并在您订餐时显示卡路里信息。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 水摄入控制 -->
+        <div class="card">
+            <div class="p-4 border-b">
+                <div class="section-title">
+                    <i class="fas fa-tint"></i> 水摄入控制
+                </div>
+            </div>
+            
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="font-medium">启用饮水提醒</div>
+                    <label class="switch">
+                        <div class="custom-checkbox checked" onclick="toggleCheckbox(this)"></div>
+                    </label>
+                </div>
+                
+                <!-- 水摄入目标 -->
+                <div>
+                    <div class="text-gray-700 mb-1">每日饮水目标</div>
+                    <div class="flex items-center justify-between">
+                        <div class="text-2xl font-medium text-blue-600">2000</div>
+                        <div class="text-sm text-gray-500">毫升/天</div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <input type="range" min="1000" max="3000" value="2000" class="slider" id="waterSlider" oninput="updateWater(this.value)">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>1000ml</span>
+                            <span>2000ml</span>
+                            <span>3000ml</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 水摄入进度 -->
+                <div class="mt-6">
+                    <div class="text-gray-700 mb-3">今日饮水进度</div>
+                    <div class="flex justify-between items-center">
+                        <div class="text-lg font-medium">750 / 2000 ml</div>
+                        <div class="text-sm text-blue-500">38%</div>
+                    </div>
+                    
+                    <div class="storage-indicator mt-2">
+                        <div class="storage-progress bg-blue-500" style="width: 38%"></div>
+                    </div>
+                    
+                    <div class="flex justify-between mt-3">
+                        <div class="cup-icon filled"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon filled"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon filled"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon"><i class="fas fa-glass-water"></i></div>
+                        <div class="cup-icon"><i class="fas fa-glass-water"></i></div>
+                    </div>
+                </div>
+                
+                <!-- 提醒卡片 -->
+                <div class="water-reminder mt-4 p-4">
+                    <div class="font-medium">下次饮水提醒</div>
+                    <div class="text-lg font-medium mt-1">11:30</div>
+                    <div class="text-sm opacity-80 mt-1">距离现在还有42分钟</div>
+                    <div class="water-icon">
+                        <i class="fas fa-tint"></i>
+                    </div>
+                </div>
+                
+                <!-- 提醒设置 -->
+                <div class="mt-4">
+                    <div class="text-gray-700 mb-2">提醒频率</div>
+                    <div class="flex border rounded-lg overflow-hidden">
+                        <div class="flex-1 py-2 text-center bg-blue-500 text-white font-medium">每1小时</div>
+                        <div class="flex-1 py-2 text-center">每2小时</div>
+                        <div class="flex-1 py-2 text-center">自定义</div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
+                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                    <div>保持足够的水分摄入对于航行期间的身体健康至关重要，特别是在热带气候区域。</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 保存按钮 -->
+        <div class="fixed bottom-16 left-0 right-0 p-4">
+            <button class="w-full py-3 bg-blue-500 text-white font-medium rounded-lg">保存变更</button>
+        </div>
+    </div>
+
+    <!-- 底部标签栏 -->
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="tab-icon fas fa-home"></i>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-compass"></i>
+            <span>广场</span>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-globe"></i>
+            <span>发现</span>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-clipboard-list"></i>
+            <span>订单</span>
+        </div>
+        <div class="tab-item active">
+            <i class="tab-icon fas fa-user"></i>
+            <span>我的</span>
+        </div>
+    </div>
+
+    <script>
+        function toggleTag(element) {
+            element.classList.toggle('active');
+        }
+        
+        function toggleAllergen(element) {
+            element.classList.toggle('active');
+        }
+        
+        function toggleCheckbox(element) {
+            element.classList.toggle('checked');
+        }
+        
+        function updateCalories(value) {
+            document.querySelector('.card:nth-child(3) .text-2xl').innerText = value;
+            
+            // 更新每餐分配
+            const breakfast = Math.round(value * 0.3);
+            const lunch = Math.round(value * 0.4);
+            const dinner = Math.round(value * 0.3);
+            
+            const mealDivs = document.querySelectorAll('.card:nth-child(3) .flex.justify-between .text-center .text-lg');
+            mealDivs[0].innerText = breakfast;
+            mealDivs[1].innerText = lunch;
+            mealDivs[2].innerText = dinner;
+        }
+        
+        function updateWater(value) {
+            document.querySelector('.card:nth-child(4) .text-2xl').innerText = value;
+            
+            // 更新进度百分比
+            const progress = document.querySelector('.card:nth-child(4) .text-lg.font-medium');
+            const current = parseInt(progress.innerText.split('/')[0].trim());
+            progress.innerText = `${current} / ${value} ml`;
+            
+            const percentage = Math.round((current / value) * 100);
+            document.querySelector('.card:nth-child(4) .text-blue-500').innerText = `${percentage}%`;
+            document.querySelector('.card:nth-child(4) .storage-progress').style.width = `${percentage}%`;
+        }
+        
+        // 保存按钮点击事件
+        document.getElementById('saveButton').addEventListener('click', function() {
+            alert('饮食需求已保存！');
+        });
+    </script>
+</body>
+</html> 

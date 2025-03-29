@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动详情 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+        .gallery-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .gallery-thumbnail.active {
+            border: 2px solid #0d6efd;
+        }
+        .nav-tab {
+            padding: 12px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .nav-tab.active {
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: #f0f2f5;
+            color: #666;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .tag.warning {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        .speaker-card {
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .speaker-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+        .action-button {
+            border-radius: 24px;
+            padding: 8px 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        .event-banner {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+        }
+        .event-time-badge {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .event-tag {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .event-tag.free {
+            background-color: #52c41a;
+            color: white;
+        }
+        .event-tag.paid {
+            background-color: #f5222d;
+            color: white;
+        }
+        .event-tag.special {
+            background-color: #722ed1;
+            color: white;
+        }
+        .event-tag.regular {
+            background-color: #1890ff;
+            color: white;
+        }
+        .countdown {
+            background: linear-gradient(135deg, #ff4d4d, #f9644e);
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .countdown-number {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            padding: 2px 4px;
+            min-width: 24px;
+            text-align: center;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .discount-badge {
+            background-color: #ff4d4d;
+            color: white;
+            padding: 1px 4px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: bold;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 活动封面图 -->
+    <div class="event-banner">
+        <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover" alt="私享晚宴">
+        <div class="absolute top-4 left-4">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center" onclick="window.history.back()">
+                <i class="fas fa-chevron-left text-white"></i>
+            </div>
+        </div>
+        <div class="event-time-badge">
+            <i class="far fa-calendar-alt mr-1"></i> 7月18日 19:00-21:30
+        </div>
+        <div class="event-tag paid">付费活动</div>
+        <div class="event-tag special" style="top: 50px; right: 16px;">特色活动</div>
+    </div>
+
+    <!-- 活动信息 -->
+    <div class="px-4 pt-4 pb-2 bg-white">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-bold">星空下的私享晚宴</h1>
+                <div class="flex items-center mt-1">
+                    <div class="flex text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <span class="text-gray-500 text-xs ml-1">特别推荐</span>
+                </div>
+            </div>
+            <div class="bg-purple-100 text-purple-500 text-xs px-2 py-1 rounded">
+                <i class="fas fa-crown mr-1"></i> 本航程独家
+            </div>
+        </div>
+        <div class="flex items-center mt-3">
+            <div class="text-xs text-gray-500">
+                <span class="mr-3"><i class="fas fa-map-marker-alt mr-1"></i> 顶层甲板 · 星光餐厅</span>
+                <span><i class="fas fa-clock mr-1"></i> 150分钟</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 倒计时抢购 -->
+    <div class="m-4">
+        <div class="countdown flex justify-between items-center py-2 px-3">
+            <div class="text-sm font-medium">限时优惠</div>
+            <div class="flex items-center space-x-1 text-xs">
+                <div class="countdown-number">23</div>
+                <span>:</span>
+                <div class="countdown-number">45</div>
+                <span>:</span>
+                <div class="countdown-number">12</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex">
+            <div class="nav-tab active flex-1">详情</div>
+            <div class="nav-tab flex-1">嘉宾</div>
+            <div class="nav-tab flex-1">菜单</div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+        <!-- 活动介绍 -->
+        <div class="card m-4 p-4">
+            <h3 class="font-semibold mb-2">活动介绍</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                在顶层甲板的星光餐厅，我们为您精心准备了一场融合美食与星空的奢华体验。米其林三星主厨亲自到场掌勺，为您带来一场6道式的法式fine dining盛宴。晚宴期间，您可以欣赏到壮丽的海上星空，专业天文学家将为您讲解星座知识，让您在享用美食的同时，感受宇宙的浩瀚与神秘。
+            </p>
+            <div class="mt-3">
+                <div class="tag"><i class="fas fa-utensils mr-1"></i> 法式料理</div>
+                <div class="tag"><i class="fas fa-glass-cheers mr-1"></i> 含酒水</div>
+                <div class="tag"><i class="fas fa-star mr-1"></i> 限量席位</div>
+                <div class="tag"><i class="fas fa-moon mr-1"></i> 星空观赏</div>
+            </div>
+        </div>
+
+        <!-- 活动亮点 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动亮点</h3>
+            <div class="mb-3 flex items-start">
+                <div class="bg-purple-100 text-purple-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    由米其林三星主厨亲自掌勺的6道式法式fine dining盛宴
+                </div>
+            </div>
+            <div class="mb-3 flex items-start">
+                <div class="bg-purple-100 text-purple-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    精选法国顶级葡萄酒和香槟，由专业侍酒师为您服务
+                </div>
+            </div>
+            <div class="mb-3 flex items-start">
+                <div class="bg-purple-100 text-purple-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    专业天文学家现场讲解星座知识，配备天文望远镜
+                </div>
+            </div>
+            <div class="flex items-start">
+                <div class="bg-purple-100 text-purple-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    限量20个席位，确保私密和专属体验
+                </div>
+            </div>
+        </div>
+        
+        <!-- 活动图片集 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动掠影</h3>
+            <div class="flex space-x-2 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail active" alt="星空晚宴">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="精致料理">
+                <img src="https://images.unsplash.com/photo-1515541324332-7dd0c37426e0?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="葡萄酒">
+                <img src="https://images.unsplash.com/photo-1523881374236-dd34f6ac1226?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="星空观赏">
+            </div>
+        </div>
+        
+        <!-- 活动须知 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动须知</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>请穿着正装参加，男士需穿西装或领结，女士需穿晚礼服</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>若有特殊饮食要求，请在预订时提前告知</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>建议提前30分钟到达，以便入座和享用欢迎饮品</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>活动取消政策：活动前48小时取消可退全款，24-48小时退50%，24小时内不可退款</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 活动嘉宾 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动嘉宾</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="speaker-card">
+                    <img src="https://images.unsplash.com/photo-1583394293214-28ded15ee548?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="speaker-image" alt="主厨 Jean">
+                    <div class="p-3">
+                        <div class="font-medium text-sm">Jean Dubois</div>
+                        <div class="text-xs text-gray-500 mt-1">米其林三星主厨</div>
+                        <div class="text-xs text-gray-600 mt-2">法国顶级厨师，曾在巴黎多家米其林三星餐厅担任主厨</div>
+                    </div>
+                </div>
+                <div class="speaker-card">
+                    <img src="https://images.unsplash.com/photo-1612831455359-970e23a1e4e9?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="speaker-image" alt="天文学家 Sarah">
+                    <div class="p-3">
+                        <div class="font-medium text-sm">Sarah Johnson</div>
+                        <div class="text-xs text-gray-500 mt-1">天文学家</div>
+                        <div class="text-xs text-gray-600 mt-2">哈佛大学天文物理学博士，NASA顾问，著名天文科普作家</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 菜单预览 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">菜单预览</h3>
+            <div class="space-y-4">
+                <div>
+                    <div class="font-medium text-sm mb-1">开胃菜</div>
+                    <div class="text-xs text-gray-600">鹅肝酱配无花果酱与烤法棍</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配酒：2015年法国香槟</div>
+                </div>
+                
+                <div>
+                    <div class="font-medium text-sm mb-1">汤品</div>
+                    <div class="text-xs text-gray-600">松露野菇浓汤配香草奶油</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配酒：2018年勃艮第白葡萄酒</div>
+                </div>
+                
+                <div>
+                    <div class="font-medium text-sm mb-1">前菜</div>
+                    <div class="text-xs text-gray-600">香煎扇贝配柑橘沙拉</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配酒：2017年普罗旺斯桃红葡萄酒</div>
+                </div>
+                
+                <div>
+                    <div class="font-medium text-sm mb-1">主菜</div>
+                    <div class="text-xs text-gray-600">慢煮和牛牛排配松露土豆泥与时令蔬菜</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配酒：2010年波尔多红葡萄酒</div>
+                </div>
+                
+                <div>
+                    <div class="font-medium text-sm mb-1">甜点</div>
+                    <div class="text-xs text-gray-600">巧克力熔岩蛋糕配覆盆子酱与香草冰淇淋</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配酒：2009年贵腐甜白葡萄酒</div>
+                </div>
+                
+                <div>
+                    <div class="font-medium text-sm mb-1">小食</div>
+                    <div class="text-xs text-gray-600">手工巧克力与马卡龙</div>
+                    <div class="text-xs text-gray-500 mt-1">搭配：精选咖啡或茶</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-2 flex justify-between items-center">
+        <div>
+            <div class="flex items-center">
+                <div class="text-sm text-gray-500 mr-2"><span class="line-through">¥98</span></div>
+                <div class="text-lg font-bold text-red-500">¥79</div>
+                <span class="text-xs bg-red-500 text-white px-1.5 py-0.5 rounded ml-1.5">优惠</span>
+            </div>
+        </div>
+        <div class="flex">
+            <button class="action-button bg-blue-50 text-blue-500 flex-1 mr-2 w-24 text-sm py-2">
+                <i class="far fa-calendar mr-1"></i> 添加日程
+            </button>
+            <button class="action-button bg-red-500 text-white flex-1 w-28 text-sm py-2" onclick="window.location.href='EventReservationDetails.html'">
+                立即预订
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 模拟图片切换
+        document.addEventListener('DOMContentLoaded', function() {
+            const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+            
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener('click', function() {
+                    // 移除所有active类
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    // 给当前点击的缩略图添加active类
+                    this.classList.add('active');
+                });
+            });
+            
+            // 模拟倒计时
+            let hours = 23;
+            let minutes = 45;
+            let seconds = 12;
+            
+            const hoursEl = document.querySelectorAll('.countdown-number')[0];
+            const minutesEl = document.querySelectorAll('.countdown-number')[1];
+            const secondsEl = document.querySelectorAll('.countdown-number')[2];
+            
+            setInterval(function() {
+                seconds--;
+                if (seconds < 0) {
+                    seconds = 59;
+                    minutes--;
+                    if (minutes < 0) {
+                        minutes = 59;
+                        hours--;
+                        if (hours < 0) {
+                            hours = 0;
+                            minutes = 0;
+                            seconds = 0;
+                        }
+                    }
+                }
+                
+                hoursEl.textContent = hours.toString().padStart(2, '0');
+                minutesEl.textContent = minutes.toString().padStart(2, '0');
+                secondsEl.textContent = seconds.toString().padStart(2, '0');
+            }, 1000);
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>航次选择与验证 - 爱达·魔都号</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .main-content {
+            min-height: calc(100vh - 44px);
+            display: flex;
+            flex-direction: column;
+        }
+        .language-selector {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+        .form-sublabel {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: white;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        .input-wrapper {
+            position: relative;
+        }
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 16px;
+            color: #666;
+        }
+        .input-with-icon {
+            padding-left: 46px;
+        }
+        .error-message {
+            font-size: 12px;
+            color: #d93025;
+            margin-top: 4px;
+            display: none;
+        }
+        .progress-circles {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .progress-circle {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin: 0 4px;
+        }
+        .progress-circle.active {
+            background-color: #1a73e8;
+            width: 10px;
+            height: 10px;
+            margin-top: -1px;
+        }
+        .bg-ship {
+            background-image: url('https://images.unsplash.com/photo-1599640842225-85d111c60e6b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 30%;
+            opacity: 0.05;
+            z-index: -1;
+        }
+        .verification-digits {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .digit-input {
+            width: 45px;
+            height: 56px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 24px;
+            text-align: center;
+            background-color: white;
+        }
+        .digit-input:focus {
+            border-color: #1a73e8;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+        }
+        .resend-code {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 16px;
+            font-size: 14px;
+        }
+        .timer {
+            color: #666;
+            margin-left: 6px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 背景图 -->
+    <div class="bg-ship"></div>
+
+    <!-- 语言选择器 -->
+    <div class="language-selector">
+        <span class="mr-2 font-medium">中文</span>
+        <i class="fas fa-globe text-blue-500 mx-1"></i>
+        <span class="ml-2">English</span>
+    </div>
+    
+    <!-- 主要内容区域 -->
+    <div class="main-content p-6">
+        <div class="mb-8">
+            <button class="p-2 rounded-full hover:bg-gray-100" onclick="window.location.href='LoginPage2.html'">
+                <i class="fas fa-arrow-left text-gray-500"></i>
+            </button>
+        </div>
+        
+        <div class="flex-1">
+            <!-- 标题 -->
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-gray-800">航次选择与验证</h1>
+                <p class="text-gray-500 mt-1">请选择您的航次并输入短信验证码</p>
+                <p class="text-gray-500 text-sm">Cruise Selection & Verification - Please select your cruise and enter SMS verification code</p>
+            </div>
+            
+            <!-- 进度指示器 -->
+            <div class="progress-circles mb-8">
+                <div class="progress-circle"></div>
+                <div class="progress-circle"></div>
+                <div class="progress-circle active"></div>
+                <div class="progress-circle"></div>
+            </div>
+            
+            <!-- 验证表单 -->
+            <form id="verificationForm" class="w-full max-w-md" onsubmit="return validateForm()">
+                <!-- 航次选择 -->
+                <div class="form-group">
+                    <label class="form-label">航次选择 Cruise Selection</label>
+                    <p class="form-sublabel">请选择您正在乘坐的航次 Please select the cruise you are currently on</p>
+                    <div class="input-wrapper">
+                        <i class="input-icon fas fa-ship"></i>
+                        <select id="cruiseSelection" class="form-select input-with-icon">
+                            <option value="" disabled selected>请选择航次 Select cruise</option>
+                            <option value="SH-HK-20240610">上海-香港 (2024年6月10日) Shanghai-Hong Kong (Jun 10, 2024)</option>
+                            <option value="HK-JP-20240617">香港-大阪-东京 (2024年6月17日) Hong Kong-Osaka-Tokyo (Jun 17, 2024)</option>
+                            <option value="JP-SH-20240624">东京-上海 (2024年6月24日) Tokyo-Shanghai (Jun 24, 2024)</option>
+                            <option value="SH-SG-20240701">上海-新加坡 (2024年7月1日) Shanghai-Singapore (Jul 1, 2024)</option>
+                        </select>
+                    </div>
+                    <div id="cruiseSelectionError" class="error-message">请选择您的航次 Please select your cruise</div>
+                </div>
+                
+                <!-- 验证码 -->
+                <div class="form-group mt-8">
+                    <label class="form-label">验证码 Verification Code</label>
+                    <p class="form-sublabel">请输入发送到您登记手机号的6位验证码 Please enter the 6-digit code sent to your registered phone number</p>
+                    
+                    <div class="verification-digits">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 1)" id="digit1">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 2)" id="digit2">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 3)" id="digit3">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 4)" id="digit4">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 5)" id="digit5">
+                        <input type="text" maxlength="1" class="digit-input" onkeyup="moveToNext(this, 6)" id="digit6">
+                    </div>
+                    
+                    <div id="codeError" class="error-message">请输入有效的验证码 Please enter a valid verification code</div>
+                    
+                    <div class="resend-code">
+                        <span class="text-blue-500 cursor-pointer" onclick="resendCode()">重新发送验证码 Resend code</span>
+                        <span class="timer" id="timer">59s</span>
+                    </div>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <div class="mt-8">
+                    <button type="submit" class="w-full py-3 bg-blue-500 text-white font-medium rounded-lg">
+                        下一步 Next
+                    </button>
+                </div>
+            </form>
+            
+            <!-- 帮助信息 -->
+            <div class="mt-6 text-center">
+                <a href="#" class="text-blue-500 text-sm">
+                    <i class="fas fa-question-circle mr-1"></i>
+                    没有收到验证码？
+                </a>
+                <p class="text-xs text-gray-500 mt-1">Haven't received the code?</p>
+            </div>
+        </div>
+        
+        <!-- 安全提示 -->
+        <div class="mt-auto pt-8">
+            <div class="text-xs text-gray-500 flex items-center justify-center">
+                <i class="fas fa-shield-alt text-green-500 mr-2"></i>
+                <span>验证码将在10分钟内失效 The verification code will expire in 10 minutes</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 倒计时功能
+        let countdown = 59;
+        const timer = document.getElementById('timer');
+        
+        function startTimer() {
+            countdown = 59;
+            updateTimer();
+            
+            const interval = setInterval(() => {
+                countdown--;
+                updateTimer();
+                
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    document.querySelector('.resend-code span').classList.remove('text-gray-400');
+                    document.querySelector('.resend-code span').classList.add('text-blue-500');
+                }
+            }, 1000);
+        }
+        
+        function updateTimer() {
+            timer.innerText = countdown + 's';
+        }
+        
+        function resendCode() {
+            if (countdown <= 0) {
+                document.querySelector('.resend-code span').classList.remove('text-blue-500');
+                document.querySelector('.resend-code span').classList.add('text-gray-400');
+                startTimer();
+                alert('验证码已重新发送 Verification code has been resent');
+            }
+        }
+        
+        function moveToNext(current, nextIndex) {
+            if (current.value.length === 1) {
+                if (nextIndex <= 6) {
+                    document.getElementById('digit' + nextIndex).focus();
+                }
+            }
+        }
+        
+        function validateForm() {
+            let isValid = true;
+            const cruise = document.getElementById('cruiseSelection').value;
+            
+            // 验证航次选择
+            if (!cruise) {
+                document.getElementById('cruiseSelectionError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('cruiseSelectionError').style.display = 'none';
+            }
+            
+            // 验证验证码
+            let code = '';
+            for (let i = 1; i <= 6; i++) {
+                code += document.getElementById('digit' + i).value;
+            }
+            
+            if (code.length !== 6 || !/^\d+$/.test(code)) {
+                document.getElementById('codeError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('codeError').style.display = 'none';
+            }
+            
+            if (isValid) {
+                window.location.href = 'FinalLoginPage.html';
+                return false; // 防止表单提交
+            }
+            return false;
+        }
+        
+        // 初始化倒计时
+        startTimer();
+    </script>
+</body>
+</html> 

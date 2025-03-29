@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜单列表 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .main-content {
+            padding-bottom: 60px;
+            display: flex;
+            height: calc(100vh - 44px);
+        }
+        .menu-sidebar {
+            width: 90px;
+            background-color: #f7f8fa;
+            overflow-y: auto;
+            height: 100%;
+            flex-shrink: 0;
+        }
+        .menu-content {
+            flex: 1;
+            overflow-y: auto;
+            height: 100%;
+            background-color: #ffffff;
+        }
+        .sidebar-item {
+            padding: 14px 8px;
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            position: relative;
+            cursor: pointer;
+        }
+        .sidebar-item.active {
+            color: #0d6efd;
+            background-color: #ffffff;
+        }
+        .sidebar-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            height: 20px;
+            width: 3px;
+            background-color: #0d6efd;
+            transform: translateY(-50%);
+        }
+        .category-header {
+            padding: 12px 16px 8px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            position: sticky;
+            top: 0;
+            background-color: #ffffff;
+            z-index: 10;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .dish-card {
+            display: flex;
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+        .dish-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 6px;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .dish-info {
+            flex: 1;
+            margin-left: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .dish-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        .dish-desc {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 8px;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+        .dish-price {
+            font-size: 15px;
+            font-weight: 500;
+            color: #ff4d4d;
+        }
+        .dish-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            margin-right: 6px;
+        }
+        .tag-hot {
+            background-color: #fff2e8;
+            color: #fa541c;
+        }
+        .tag-new {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .tag-recommend {
+            background-color: #e6f7ff;
+            color: #1890ff;
+        }
+        .add-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #0d6efd;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+        .quantity-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #f0f2f5;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        .quantity {
+            margin: 0 8px;
+            font-size: 14px;
+            color: #333;
+        }
+        .section-divider {
+            height: 10px;
+            background-color: #f7f8fa;
+        }
+        .category-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+            color: inherit;
+        }
+        .badge-discount {
+            background-color: #fff3e6;
+            color: #fa8c16;
+        }
+        .dish-card.featured {
+            background-color: #fffbe6;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="flex items-center">
+            <div class="w-8 h-8 flex items-center justify-center mr-2" onclick="window.location.href='restaurant_detail.html'">
+                <i class="fas fa-chevron-left"></i>
+            </div>
+            <div class="text-lg font-medium">菜单</div>
+        </div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div class="main-content">
+        <!-- 左侧菜单分类 -->
+        <div class="menu-sidebar">
+            <div class="sidebar-item active">
+                <i class="fas fa-fire category-icon"></i>
+                <div>今日特色</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-thumbs-up category-icon"></i>
+                <div>推荐</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-utensils category-icon"></i>
+                <div>A套餐</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-utensils category-icon"></i>
+                <div>B套餐</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-fish category-icon"></i>
+                <div>日本料理</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-pepper-hot category-icon"></i>
+                <div>韩国菜</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-drumstick-bite category-icon"></i>
+                <div>粤菜</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-cocktail category-icon"></i>
+                <div>饮品</div>
+            </div>
+            <div class="sidebar-item">
+                <i class="fas fa-ice-cream category-icon"></i>
+                <div>甜点</div>
+            </div>
+        </div>
+
+        <!-- 右侧菜品列表 -->
+        <div class="menu-content">
+            <!-- 今日特色 -->
+            <div class="category-header">今日特色 <span class="text-xs text-gray-500">(5件)</span></div>
+            
+            <div class="dish-card featured">
+                <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="三文鱼刺身">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">三文鱼刺身拼盘</div>
+                        <div class="dish-desc">精选挪威三文鱼，现切现吃，保证新鲜</div>
+                        <div class="flex">
+                            <span class="tag tag-hot">热销</span>
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥88</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1555126634-323283e090fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="北京烤鸭">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">北京烤鸭半只</div>
+                        <div class="dish-desc">传统工艺制作，皮酥肉嫩，搭配特制甜面酱</div>
+                        <div class="flex">
+                            <span class="tag tag-hot">热销</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥128</div>
+                        <div class="quantity-control">
+                            <div class="quantity-btn">
+                                <i class="fas fa-minus text-xs"></i>
+                            </div>
+                            <span class="quantity">1</span>
+                            <div class="quantity-btn" style="background-color: #0d6efd; color: white;">
+                                <i class="fas fa-plus text-xs"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="日式和牛">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">日式和牛寿喜烧</div>
+                        <div class="dish-desc">A5和牛，入口即化，搭配特制酱汁</div>
+                        <div class="flex">
+                            <span class="tag tag-new">新品</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥168</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1534939561126-855b8675edd7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="白松露意面">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">白松露奶油意面</div>
+                        <div class="dish-desc">意大利进口白松露，配以新鲜奶油和手工意面</div>
+                        <div class="flex">
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥108</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1542803293-59f0d0751cf7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="巧克力熔岩蛋糕">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">巧克力熔岩蛋糕</div>
+                        <div class="dish-desc">比利时进口黑巧克力制作，口感浓郁，配以香草冰淇淋</div>
+                        <div class="flex">
+                            <span class="tag tag-hot">热销</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥58</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- 推荐 -->
+            <div class="category-header">推荐 <span class="text-xs text-gray-500">(4件)</span></div>
+            
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1551183053-bf91a1c6c0f3?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="龙虾意面">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">波士顿龙虾意面</div>
+                        <div class="dish-desc">整只波士顿龙虾，搭配手工意面和龙虾浓汤酱汁</div>
+                        <div class="flex">
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥198</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1577906096429-f73c2c312435?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="鹅肝">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">香煎鹅肝配无花果</div>
+                        <div class="dish-desc">法国进口鹅肝，搭配新鲜无花果和树莓酱</div>
+                        <div class="flex">
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥168</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1611355333358-8bb57a878aa4?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="海鲜拼盘">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">豪华海鲜拼盘</div>
+                        <div class="dish-desc">鲜活龙虾、帝王蟹、生蚝、扇贝等多种海鲜</div>
+                        <div class="flex">
+                            <span class="tag tag-hot">热销</span>
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥368</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1602341628288-e76f98fc479a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="牛排">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">澳洲M9和牛眼肉牛排</div>
+                        <div class="dish-desc">300克澳洲M9和牛眼肉，搭配时令蔬菜和黑松露土豆泥</div>
+                        <div class="flex">
+                            <span class="tag tag-recommend">船长推荐</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥278</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- A套餐 -->
+            <div class="category-header">A套餐 <span class="text-xs text-gray-500">(3件)</span></div>
+            
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1579166597949-616e0b248f29?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="A1套餐">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">A1双人套餐</div>
+                        <div class="dish-desc">前菜+沙拉+主菜(牛排/三文鱼)+甜点+饮品</div>
+                        <div class="flex">
+                            <span class="tag badge-discount">8.5折</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥398</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1570461226707-b8568f787446?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="A2套餐">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">A2家庭套餐</div>
+                        <div class="dish-desc">前菜+沙拉+3种主菜(牛排/龙虾/鸡胸肉)+2种甜点+4杯饮品</div>
+                        <div class="flex">
+                            <span class="tag badge-discount">8折</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥688</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1574484284002-952d92456975?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="A3套餐">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">A3单人商务套餐</div>
+                        <div class="dish-desc">浓汤+沙拉+主菜(牛排/鳕鱼)+甜点+咖啡</div>
+                        <div class="flex">
+                            <span class="tag badge-discount">9折</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥238</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-divider"></div>
+
+            <!-- B套餐 -->
+            <div class="category-header">B套餐 <span class="text-xs text-gray-500">(2件)</span></div>
+            
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1626045169148-fed5a46460d5?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="B1套餐">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">B1自助餐</div>
+                        <div class="dish-desc">上百种美食自助，畅吃畅享</div>
+                        <div class="flex">
+                            <span class="tag tag-hot">热销</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥298/位</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dish-card">
+                <img src="https://images.unsplash.com/photo-1571997478779-2adcbbe9ab2f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="dish-image" alt="B2套餐">
+                <div class="dish-info">
+                    <div>
+                        <div class="dish-title">B2儿童套餐</div>
+                        <div class="dish-desc">儿童友好食物，含小礼物，适合3-12岁儿童</div>
+                        <div class="flex">
+                            <span class="tag badge-discount">7折</span>
+                        </div>
+                    </div>
+                    <div class="dish-actions">
+                        <div class="dish-price">¥148</div>
+                        <div class="add-btn">
+                            <i class="fas fa-plus text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 切换菜单分类
+            const sidebarItems = document.querySelectorAll('.sidebar-item');
+            
+            sidebarItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有active类
+                    sidebarItems.forEach(i => i.classList.remove('active'));
+                    // 给当前点击的添加active类
+                    this.classList.add('active');
+                    
+                    // 滚动对应的分类到视图中
+                    const category = this.querySelector('div').textContent;
+                    const categoryHeader = document.querySelector(`.category-header:contains('${category}')`);
+                    if (categoryHeader) {
+                        categoryHeader.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // 为了模拟功能，添加购物车按钮点击事件
+            const addBtns = document.querySelectorAll('.add-btn');
+            addBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const dishTitle = this.closest('.dish-card').querySelector('.dish-title').textContent;
+                    alert(`${dishTitle} 已添加到购物车`);
+                });
+            });
+            
+            // 数量控制按钮点击事件
+            const minusBtns = document.querySelectorAll('.quantity-btn:first-child');
+            const plusBtns = document.querySelectorAll('.quantity-btn:last-child');
+            
+            minusBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const quantityEl = this.nextElementSibling;
+                    let quantity = parseInt(quantityEl.textContent);
+                    if (quantity > 1) {
+                        quantityEl.textContent = quantity - 1;
+                    }
+                });
+            });
+            
+            plusBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const quantityEl = this.previousElementSibling;
+                    let quantity = parseInt(quantityEl.textContent);
+                    quantityEl.textContent = quantity + 1;
+                });
+            });
+        });
+
+        // jQuery风格的contains选择器
+        Element.prototype.matches = Element.prototype.matches || Element.prototype.msMatchesSelector;
+        NodeList.prototype.forEach = NodeList.prototype.forEach || Array.prototype.forEach;
+        
+        const contains = (selector, text) => {
+            const elements = document.querySelectorAll(selector);
+            return Array.prototype.filter.call(elements, element => {
+                return RegExp(text).test(element.textContent);
+            });
+        };
+    </script>
+</body>
+</html> 

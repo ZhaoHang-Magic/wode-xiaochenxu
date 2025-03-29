@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>营养分析 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .popup-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: flex-end;
+            z-index: 50;
+        }
+        .popup {
+            width: 100%;
+            background-color: white;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .nutrition-progress {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #f0f2f5;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            border-radius: 3px;
+        }
+        .food-carousel {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .food-carousel::-webkit-scrollbar {
+            display: none;
+        }
+        .carousel-item {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            position: relative;
+        }
+        .carousel-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+        .carousel-indicators {
+            display: flex;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            margin: 0 4px;
+        }
+        .indicator.active {
+            background-color: #0d6efd;
+            width: 16px;
+            border-radius: 4px;
+        }
+        .nutrient-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            background-color: #f0f2f5;
+            color: #666;
+        }
+        .nutrient-tag.good {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .nutrient-tag.warning {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        .nutrient-chart {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(
+                #0d6efd 0% 30%, 
+                #52c41a 30% 55%, 
+                #fa8c16 55% 80%, 
+                #d9d9d9 80% 100%
+            );
+        }
+        .chart-center {
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 60%;
+            height: 60%;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body class="bg-black bg-opacity-50">
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 弹窗容器 -->
+    <div class="popup-container">
+        <div class="popup">
+            <!-- 弹窗头部 -->
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-lg font-bold">今日饮食分析</h2>
+                    <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center" onclick="window.history.back()">
+                        <i class="fas fa-times text-gray-500"></i>
+                    </div>
+                </div>
+                <div class="text-xs text-gray-500">06月10日 · 航程第3天</div>
+            </div>
+
+            <!-- 营养摄入总览 -->
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="font-semibold mb-3">卡路里摄入</h3>
+                <div class="flex items-center mb-4">
+                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-utensils text-blue-500"></i>
+                    </div>
+                    <div class="ml-3 flex-grow">
+                        <div class="text-sm font-medium">已摄入卡路里</div>
+                        <div class="flex items-center">
+                            <span class="text-xl font-bold mr-1">1,240</span>
+                            <span class="text-xs text-gray-400">/ 2,000 千卡</span>
+                        </div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-blue-500" style="width: 62%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center justify-between text-xs text-gray-500">
+                    <div>目标摄入: 2,000 千卡</div>
+                    <div>已完成: 62%</div>
+                </div>
+            </div>
+
+            <!-- 宏量营养素分析 -->
+            <div class="p-4 border-b border-gray-100">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold">宏量营养素</h3>
+                    <div class="flex">
+                        <div class="nutrient-chart">
+                            <div class="chart-center">
+                                <div class="text-center">
+                                    <div class="text-xs text-gray-500">总计</div>
+                                    <div class="font-medium">1,240</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="text-sm flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            蛋白质
+                        </div>
+                        <div class="text-sm text-gray-600">45g (30%)</div>
+                    </div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar bg-blue-500" style="width: 75%"></div>
+                    </div>
+                    <div class="flex justify-between items-center mt-1 text-xs text-gray-500">
+                        <div>目标: 60g</div>
+                        <div>已完成: 75%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="text-sm flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                            碳水化合物
+                        </div>
+                        <div class="text-sm text-gray-600">180g (25%)</div>
+                    </div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar bg-green-500" style="width: 60%"></div>
+                    </div>
+                    <div class="flex justify-between items-center mt-1 text-xs text-gray-500">
+                        <div>目标: 300g</div>
+                        <div>已完成: 60%</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <div class="flex justify-between items-center mb-1">
+                        <div class="text-sm flex items-center">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full mr-2"></div>
+                            脂肪
+                        </div>
+                        <div class="text-sm text-gray-600">35g (45%)</div>
+                    </div>
+                    <div class="nutrition-progress">
+                        <div class="progress-bar bg-yellow-500" style="width: 40%"></div>
+                    </div>
+                    <div class="flex justify-between items-center mt-1 text-xs text-gray-500">
+                        <div>目标: 67g</div>
+                        <div>已完成: 52%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 微量元素分析 -->
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="font-semibold mb-3">微量营养素</h3>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">维生素C</div>
+                        <div class="text-sm font-medium">65 mg</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-green-500" style="width: 82%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">82%</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">钙</div>
+                        <div class="text-sm font-medium">680 mg</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-green-500" style="width: 68%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">68%</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">铁</div>
+                        <div class="text-sm font-medium">12 mg</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-green-500" style="width: 75%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">75%</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">钠</div>
+                        <div class="text-sm font-medium">1,560 mg</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-yellow-500" style="width: 65%"></div>
+                        </div>
+                        <div class="text-xs text-yellow-500 mt-1">偏高</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">膳食纤维</div>
+                        <div class="text-sm font-medium">16 g</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-green-500" style="width: 55%"></div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-1">55%</div>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-3">
+                        <div class="text-xs text-gray-500">糖</div>
+                        <div class="text-sm font-medium">28 g</div>
+                        <div class="nutrition-progress mt-1">
+                            <div class="progress-bar bg-yellow-500" style="width: 70%"></div>
+                        </div>
+                        <div class="text-xs text-yellow-500 mt-1">偏高</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 饮食建议 -->
+            <div class="p-4 border-b border-gray-100">
+                <h3 class="font-semibold mb-3">饮食建议</h3>
+                <div class="bg-blue-50 p-3 rounded-lg mb-3">
+                    <div class="flex">
+                        <i class="fas fa-lightbulb text-blue-500 mr-2 mt-0.5"></i>
+                        <div>
+                            <div class="text-sm font-medium">个性化建议</div>
+                            <div class="text-xs text-gray-600 mt-1">
+                                根据您今日的饮食情况，建议增加蔬菜水果摄入，减少含糖饮料和高钠食品。晚餐可选择富含蛋白质但低脂的食物，例如烤鱼或鸡胸肉。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex flex-wrap">
+                    <div class="nutrient-tag good">蛋白质摄入充足</div>
+                    <div class="nutrient-tag warning">钠摄入偏高</div>
+                    <div class="nutrient-tag warning">糖摄入偏高</div>
+                    <div class="nutrient-tag">可增加膳食纤维</div>
+                    <div class="nutrient-tag">建议多喝水</div>
+                </div>
+            </div>
+
+            <!-- 今日用餐记录 -->
+            <div class="p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-semibold">今日用餐记录</h3>
+                    <div class="text-blue-500 text-xs">查看全部 <i class="fas fa-chevron-right text-xs"></i></div>
+                </div>
+
+                <!-- 餐品轮播图 -->
+                <div class="relative">
+                    <div class="food-carousel">
+                        <div class="carousel-item px-1">
+                            <img src="https://images.unsplash.com/photo-1551782450-17144efb9c50?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="carousel-img" alt="早餐">
+                            <div class="mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="font-medium">早餐</div>
+                                    <div class="text-xs text-gray-500">08:30</div>
+                                </div>
+                                <div class="text-sm text-gray-600">海洋自助餐厅</div>
+                                <div class="flex justify-between items-center mt-1">
+                                    <div class="text-xs text-gray-500">培根蛋卷 + 水果沙拉 + 咖啡</div>
+                                    <div class="text-xs font-medium">320 千卡</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item px-1">
+                            <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="carousel-img" alt="午餐">
+                            <div class="mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="font-medium">午餐</div>
+                                    <div class="text-xs text-gray-500">12:45</div>
+                                </div>
+                                <div class="text-sm text-gray-600">意大利餐厅</div>
+                                <div class="flex justify-between items-center mt-1">
+                                    <div class="text-xs text-gray-500">意面 + 沙拉 + 汽水</div>
+                                    <div class="text-xs font-medium">580 千卡</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item px-1">
+                            <img src="https://images.unsplash.com/photo-1485963631004-f2f00b1d6606?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="carousel-img" alt="下午茶">
+                            <div class="mt-2">
+                                <div class="flex justify-between items-center">
+                                    <div class="font-medium">下午茶</div>
+                                    <div class="text-xs text-gray-500">16:20</div>
+                                </div>
+                                <div class="text-sm text-gray-600">星空酒吧</div>
+                                <div class="flex justify-between items-center mt-1">
+                                    <div class="text-xs text-gray-500">提拉米苏 + 茶</div>
+                                    <div class="text-xs font-medium">340 千卡</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="carousel-indicators">
+                        <div class="indicator active"></div>
+                        <div class="indicator"></div>
+                        <div class="indicator"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 底部按钮 -->
+            <div class="p-4 flex">
+                <div class="flex-grow">
+                    <div class="bg-blue-500 text-white text-center py-2 rounded-full">
+                        查看健康饮食建议
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 轮播图功能
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.querySelector('.food-carousel');
+            const indicators = document.querySelectorAll('.indicator');
+            let currentIndex = 0;
+            
+            // 更新指示器
+            function updateIndicators(index) {
+                indicators.forEach((indicator, i) => {
+                    if (i === index) {
+                        indicator.classList.add('active');
+                    } else {
+                        indicator.classList.remove('active');
+                    }
+                });
+            }
+            
+            // 监听滚动事件
+            carousel.addEventListener('scroll', () => {
+                const scrollPosition = carousel.scrollLeft;
+                const itemWidth = carousel.offsetWidth;
+                const index = Math.round(scrollPosition / itemWidth);
+                
+                if (index !== currentIndex) {
+                    currentIndex = index;
+                    updateIndicators(currentIndex);
+                }
+            });
+            
+            // 点击指示器切换
+            indicators.forEach((indicator, index) => {
+                indicator.addEventListener('click', () => {
+                    carousel.scrollTo({
+                        left: index * carousel.offsetWidth,
+                        behavior: 'smooth'
+                    });
+                    updateIndicators(index);
+                    currentIndex = index;
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

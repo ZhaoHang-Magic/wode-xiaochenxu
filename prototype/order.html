@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .segmented-control {
+            display: flex;
+            background-color: #f0f2f5;
+            border-radius: 8px;
+            padding: 2px;
+            margin-bottom: 16px;
+        }
+        .segment {
+            flex: 1;
+            text-align: center;
+            padding: 8px 0;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .segment.active {
+            background-color: white;
+            color: #0d6efd;
+            font-weight: 500;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .order-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 500;
+        }
+        .status-pending {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        .status-confirmed {
+            background-color: #e6f7ff;
+            color: #0d6efd;
+        }
+        .status-completed {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .status-cancelled {
+            background-color: #fff1f0;
+            color: #f5222d;
+        }
+        .stepper {
+            display: flex;
+            margin: 16px 0;
+        }
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+        .step-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 4px;
+            position: relative;
+            z-index: 2;
+        }
+        .step.active .step-icon {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .step.completed .step-icon {
+            background-color: #52c41a;
+            color: white;
+        }
+        .step-label {
+            font-size: 10px;
+            color: #999;
+        }
+        .step.active .step-label {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        .step.completed .step-label {
+            color: #52c41a;
+            font-weight: 500;
+        }
+        .step-line {
+            position: absolute;
+            top: 12px;
+            height: 1px;
+            background-color: #f0f2f5;
+            width: 100%;
+            left: -50%;
+        }
+        .step:first-child .step-line {
+            display: none;
+        }
+        .step.completed .step-line, .step.active .step-line {
+            background-color: #52c41a;
+        }
+        .reservation-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .badge-free {
+            background-color: #e6f7ff;
+            color: #0d6efd;
+        }
+        .badge-paid {
+            background-color: #fff3e6;
+            color: #fa8c16;
+        }
+        .badge-exclusive {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .tab.active {
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .status-tag.blue {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 标题 -->
+    <div class="p-4 flex justify-between items-center">
+        <div class="text-lg font-bold">我的订单</div>
+        <div class="flex">
+            <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-receipt text-gray-500"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单导航 -->
+    <div class="px-4">
+        <div class="segmented-control">
+            <div class="segment active">全部</div>
+            <div class="segment">待确认</div>
+            <div class="segment">已确认</div>
+            <div class="segment">已完成</div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content px-4">
+        <!-- 快捷操作 -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            <div class="card p-3 flex flex-col items-center">
+                <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                    <i class="fas fa-calendar-plus text-blue-500"></i>
+                </div>
+                <div class="text-xs font-medium">预订餐厅</div>
+            </div>
+            <div class="card p-3 flex flex-col items-center">
+                <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                    <i class="fas fa-utensils text-green-500"></i>
+                </div>
+                <div class="text-xs font-medium">在线点餐</div>
+            </div>
+            <div class="card p-3 flex flex-col items-center">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                    <i class="fas fa-glass-cheers text-purple-500"></i>
+                </div>
+                <div class="text-xs font-medium">活动预约</div>
+            </div>
+        </div>
+
+        <!-- 今日订单 -->
+        <div class="mb-4">
+            <h3 class="font-semibold mb-3">今日订单</h3>
+
+            <!-- 订单卡片 - 已确认 -->
+            <div class="card mb-3">
+                <div class="flex p-3 border-b border-gray-100">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="法式餐厅">
+                    <div class="flex-grow relative">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">La Mer 法式餐厅</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="mr-2"><i class="far fa-calendar-alt mr-1"></i> 今天</span>
+                                    <span><i class="far fa-clock mr-1"></i> 19:00</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">2位 · 靠窗座位</div>
+                            </div>
+                            <div class="order-status status-confirmed">已确认</div>
+                        </div>
+                        <div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                            <i class="fas fa-utensils text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 flex justify-between items-center">
+                    <div>
+                        <div class="badge badge-paid">付费</div>
+                        <div class="text-xs text-gray-500">预约号: R220610-3842</div>
+                    </div>
+                    <div class="flex">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-map-marker-alt text-white text-xs"></i>
+                        </div>
+                        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-ellipsis-h text-gray-500 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 订单卡片 - 待确认 -->
+            <div class="card">
+                <div class="flex p-3 border-b border-gray-100">
+                    <img src="https://images.unsplash.com/photo-1528825871115-3581a5387919?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="品酒会">
+                    <div class="flex-grow relative">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">精品葡萄酒品鉴会</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="mr-2"><i class="far fa-calendar-alt mr-1"></i> 今天</span>
+                                    <span><i class="far fa-clock mr-1"></i> 20:30</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">爵士酒廊 · 1位</div>
+                            </div>
+                            <div class="order-status status-pending">待确认</div>
+                        </div>
+                        <div class="absolute right-0 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full bg-yellow-500 text-white flex items-center justify-center">
+                            <i class="fas fa-spinner text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 flex justify-between items-center">
+                    <div>
+                        <div class="badge badge-paid">付费</div>
+                        <div class="text-xs text-gray-500">活动号: E220610-1253</div>
+                    </div>
+                    <div class="flex">
+                        <div class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center mr-2">
+                            <i class="fas fa-map-marker-alt text-white text-xs"></i>
+                        </div>
+                        <div class="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-ellipsis-h text-gray-500 text-xs"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 在线点餐 -->
+        <div class="mb-4">
+            <h3 class="font-semibold mb-3">正在进行的点餐</h3>
+
+            <!-- 点餐卡片 -->
+            <div class="card">
+                <div class="flex p-3 border-b border-gray-100">
+                    <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="海洋自助餐厅">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">自助餐厅客房送餐</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span><i class="far fa-clock mr-1"></i> 预计送达时间 30 分钟</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">房间号: 8124 · 共3件商品</div>
+                            </div>
+                            <div class="order-status status-confirmed">处理中</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-3 py-2 bg-gray-50">
+                    <div class="flex items-center justify-between text-xs">
+                        <div>
+                            <span class="font-medium">夏威夷披萨</span>
+                            <span class="text-gray-500 mx-1">x1</span>
+                            <span class="text-blue-500">¥98</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">凯撒沙拉</span>
+                            <span class="text-gray-500 mx-1">x1</span>
+                            <span class="text-blue-500">¥68</span>
+                        </div>
+                        <div>
+                            <span class="font-medium">可乐</span>
+                            <span class="text-gray-500 mx-1">x1</span>
+                            <span class="text-blue-500">¥18</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 flex justify-between items-center">
+                    <div>
+                        <div class="text-sm font-medium">总计: <span class="text-blue-500">¥184</span></div>
+                        <div class="text-xs text-gray-500">订单号: F220610-6512</div>
+                    </div>
+                    <div class="flex">
+                        <div class="bg-blue-500 text-white text-xs px-3 py-1 rounded-full">
+                            跟踪订单
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史订单 -->
+        <div class="mb-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold">历史订单</h3>
+                <div class="text-blue-500 text-xs">查看全部 <i class="fas fa-chevron-right text-xs"></i></div>
+            </div>
+
+            <!-- 历史订单卡片 -->
+            <div class="card mb-3">
+                <div class="flex p-3">
+                    <img src="https://images.unsplash.com/photo-1579027989536-b7b1f875659b?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="樱花日料餐厅">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">樱花日料餐厅</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="mr-2"><i class="far fa-calendar-alt mr-1"></i> 昨天</span>
+                                    <span><i class="far fa-clock mr-1"></i> 18:30</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">2位 · 寿司吧台</div>
+                                <div class="text-xs text-gray-500 mt-1">订单号: R220609-5421</div>
+                            </div>
+                            <div class="order-status status-completed">已完成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-3">
+                <div class="flex p-3">
+                    <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="烹饪课程">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">意大利面烹饪课程</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="mr-2"><i class="far fa-calendar-alt mr-1"></i> 06/09</span>
+                                    <span><i class="far fa-clock mr-1"></i> 15:00</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">学习中心 · 1位</div>
+                                <div class="text-xs text-gray-500 mt-1">活动号: E220609-1862</div>
+                            </div>
+                            <div class="order-status status-completed">已完成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="flex p-3">
+                    <img src="https://images.unsplash.com/photo-1551024709-8f23befc6f87?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80" class="reservation-img mr-3" alt="星空酒吧">
+                    <div class="flex-grow">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-medium">星空酒吧座位预留</div>
+                                <div class="text-xs text-gray-500 mt-1">
+                                    <span class="mr-2"><i class="far fa-calendar-alt mr-1"></i> 06/08</span>
+                                    <span><i class="far fa-clock mr-1"></i> 20:00</span>
+                                </div>
+                                <div class="text-xs text-gray-500 mt-1">3位 · 露台座位</div>
+                                <div class="text-xs text-gray-500 mt-1">预约号: R220608-7384</div>
+                            </div>
+                            <div class="order-status status-completed">已完成</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏 -->
+    <div class="tab-bar">
+        <div class="tab-item">
+            <i class="tab-icon fas fa-home"></i>
+            <div>首页</div>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-compass"></i>
+            <div>发现</div>
+        </div>
+        <div class="tab-item active">
+            <i class="tab-icon fas fa-clipboard-list"></i>
+            <div>订单</div>
+        </div>
+        <div class="tab-item">
+            <i class="tab-icon fas fa-user"></i>
+            <div>我的</div>
+        </div>
+    </div>
+</body>
+</html> 

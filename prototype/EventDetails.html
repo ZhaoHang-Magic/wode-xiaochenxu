@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>活动详情 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 240px;
+            object-fit: cover;
+        }
+        .gallery-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .gallery-thumbnail.active {
+            border: 2px solid #0d6efd;
+        }
+        .nav-tab {
+            padding: 12px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .nav-tab.active {
+            color: #0d6efd;
+            font-weight: 500;
+            border-bottom: 2px solid #0d6efd;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            background-color: #f0f2f5;
+            color: #666;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .tag.warning {
+            background-color: #fff7e6;
+            color: #fa8c16;
+        }
+        .speaker-card {
+            border: 1px solid #e6e6e6;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .speaker-image {
+            width: 100%;
+            height: 140px;
+            object-fit: cover;
+        }
+        .action-button {
+            border-radius: 24px;
+            padding: 12px 0;
+            font-weight: 500;
+            text-align: center;
+        }
+        .event-banner {
+            position: relative;
+            height: 240px;
+            overflow: hidden;
+        }
+        .event-time-badge {
+            position: absolute;
+            left: 16px;
+            bottom: 16px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .event-tag {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+        }
+        .event-tag.free {
+            background-color: #52c41a;
+            color: white;
+        }
+        .event-tag.paid {
+            background-color: #f5222d;
+            color: white;
+        }
+        .event-tag.special {
+            background-color: #722ed1;
+            color: white;
+        }
+        .event-tag.regular {
+            background-color: #1890ff;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 活动封面图 -->
+    <div class="event-banner">
+        <img src="https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-full object-cover" alt="美食烹饪体验">
+        <div class="absolute top-4 left-4">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center" onclick="window.history.back()">
+                <i class="fas fa-chevron-left text-white"></i>
+            </div>
+        </div>
+        <div class="event-time-badge">
+            <i class="far fa-calendar-alt mr-1"></i> 7月15日 14:00-16:00
+        </div>
+        <div class="event-tag free">免费活动</div>
+        <div class="event-tag regular" style="top: 50px; right: 16px;">常驻活动</div>
+    </div>
+
+    <!-- 活动信息 -->
+    <div class="px-4 pt-4 pb-2 bg-white">
+        <div class="flex justify-between items-start">
+            <div>
+                <h1 class="text-xl font-bold">高级法餐烹饪工坊</h1>
+                <div class="flex items-center mt-1">
+                    <div class="flex text-yellow-400 text-xs">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <span class="text-gray-500 text-xs ml-1">4.7 (83评价)</span>
+                </div>
+            </div>
+            <div class="bg-red-100 text-red-500 text-xs px-2 py-1 rounded">
+                <i class="fas fa-users mr-1"></i> 仅剩10个名额
+            </div>
+        </div>
+        <div class="flex items-center mt-3">
+            <div class="text-xs text-gray-500">
+                <span class="mr-3"><i class="fas fa-map-marker-alt mr-1"></i> 甲板5层 · 烹饪教室</span>
+                <span><i class="fas fa-clock mr-1"></i> 120分钟</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 活动导航栏 -->
+    <div class="bg-white border-b border-gray-200">
+        <div class="flex">
+            <div class="nav-tab active flex-1">详情</div>
+            <div class="nav-tab flex-1">嘉宾</div>
+            <div class="nav-tab flex-1">评价</div>
+        </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <div class="main-content">
+        <!-- 活动介绍 -->
+        <div class="card m-4 p-4">
+            <h3 class="font-semibold mb-2">活动介绍</h3>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                跟随我们的星级大厨学习如何制作正宗的法式美食。在这个互动式工坊中，您将学习传统法式烹饪技巧，包括酱汁制作、精确的温度控制和精美的摆盘技巧。每位参与者都将亲手制作一道完整的法式主菜，并能够品尝自己的杰作。
+            </p>
+            <div class="mt-3">
+                <div class="tag"><i class="fas fa-utensils mr-1"></i> 烹饪技巧</div>
+                <div class="tag"><i class="fas fa-hands mr-1"></i> 互动体验</div>
+                <div class="tag"><i class="fas fa-user-friends mr-1"></i> 适合初学者</div>
+                <div class="tag"><i class="fas fa-certificate mr-1"></i> 含证书</div>
+            </div>
+        </div>
+
+        <!-- 活动亮点 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动亮点</h3>
+            <div class="mb-3 flex items-start">
+                <div class="bg-blue-100 text-blue-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    学习法式经典酱汁制作，掌握白汁、红酒汁等基础技巧
+                </div>
+            </div>
+            <div class="mb-3 flex items-start">
+                <div class="bg-blue-100 text-blue-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    了解精确的温度控制，学会完美烹饪牛排、鸭胸等高级食材
+                </div>
+            </div>
+            <div class="mb-3 flex items-start">
+                <div class="bg-blue-100 text-blue-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    掌握餐厅级别的精美摆盘技巧，让您的美食看起来如专业厨师制作
+                </div>
+            </div>
+            <div class="flex items-start">
+                <div class="bg-blue-100 text-blue-500 rounded-full w-6 h-6 flex items-center justify-center mr-2 flex-shrink-0">
+                    <i class="fas fa-check text-xs"></i>
+                </div>
+                <div class="text-sm text-gray-600">
+                    获得活动参与证书，以及大厨秘制的配方作为纪念
+                </div>
+            </div>
+        </div>
+        
+        <!-- 活动图片集 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动掠影</h3>
+            <div class="flex space-x-2 overflow-x-auto pb-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+                <img src="https://images.unsplash.com/photo-1556910103-1c02745aae4d?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail active" alt="烹饪课程">
+                <img src="https://images.unsplash.com/photo-1556911220-bff31c812dba?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="烹饪课程">
+                <img src="https://images.unsplash.com/photo-1542528180-a1208c5169a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="烹饪课程">
+                <img src="https://images.unsplash.com/photo-1551218808-94e220e084d2?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="gallery-thumbnail" alt="烹饪课程">
+            </div>
+        </div>
+        
+        <!-- 活动须知 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动须知</h3>
+            <ul class="text-sm text-gray-600 space-y-2">
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>建议提前15分钟到达活动地点，以便办理登记</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>所有烹饪材料和工具将由船上提供，无需自带</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>请穿着舒适的衣物，活动现场会提供围裙</span>
+                </li>
+                <li class="flex items-start">
+                    <i class="fas fa-circle text-xs mt-1 mr-2 text-gray-400"></i>
+                    <span>如需取消，请至少提前24小时通知客服</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- 活动嘉宾 -->
+        <div class="card mx-4 p-4">
+            <h3 class="font-semibold mb-3">活动嘉宾</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="speaker-card">
+                    <img src="https://images.unsplash.com/photo-1566554273541-37a9ca77b91f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="speaker-image" alt="主厨 Pierre">
+                    <div class="p-3">
+                        <div class="font-medium text-sm">Pierre Laurent</div>
+                        <div class="text-xs text-gray-500 mt-1">米其林星级主厨</div>
+                        <div class="text-xs text-gray-600 mt-2">拥有20年法式烹饪经验，曾在巴黎多家顶级餐厅工作</div>
+                    </div>
+                </div>
+                <div class="speaker-card">
+                    <img src="https://images.unsplash.com/photo-1557862921-37829c790f19?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80" class="speaker-image" alt="糕点师 Marie">
+                    <div class="p-3">
+                        <div class="font-medium text-sm">Marie Dubois</div>
+                        <div class="text-xs text-gray-500 mt-1">高级糕点师</div>
+                        <div class="text-xs text-gray-600 mt-2">专攻法式甜点，擅长制作各类精致糕点和巧克力工艺</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 用户评价 -->
+        <div class="card mx-4 p-4">
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="font-semibold">用户评价 (83)</h3>
+                <div class="text-blue-500 text-xs">查看全部 <i class="fas fa-chevron-right text-xs"></i></div>
+            </div>
+            
+            <div class="border-b pb-3 mb-3">
+                <div class="flex items-start">
+                    <img src="https://images.unsplash.com/photo-1491349174775-aaafddd81942?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="avatar mr-3" alt="用户头像">
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <div class="font-medium">陈女士</div>
+                            <div class="text-gray-500 text-xs">3天前</div>
+                        </div>
+                        <div class="flex text-yellow-400 text-xs mt-1">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <p class="text-sm mt-2">
+                            这是我参加过的最棒的烹饪课程！Pierre主厨非常专业，讲解细致，步骤清晰。我第一次做出了如此美味的牛排，酱汁的味道简直完美。强烈推荐给所有对法餐感兴趣的朋友！
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div>
+                <div class="flex items-start">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=150&q=80" class="avatar mr-3" alt="用户头像">
+                    <div class="flex-1">
+                        <div class="flex justify-between">
+                            <div class="font-medium">李先生</div>
+                            <div class="text-gray-500 text-xs">1周前</div>
+                        </div>
+                        <div class="flex text-yellow-400 text-xs mt-1">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <p class="text-sm mt-2">
+                            整体体验很棒，学到了很多实用的烹饪技巧。唯一的不足是人有点多，有时候看不太清楚示范。如果能再小班一些会更好。
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部操作栏 -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 flex justify-between items-center">
+        <div class="text-lg font-bold text-green-500">
+            免费参加
+        </div>
+        <div class="flex">
+            <button class="action-button bg-blue-50 text-blue-500 flex-1 mr-3 w-28">
+                <i class="far fa-calendar mr-1"></i> 添加日程
+            </button>
+            <button class="action-button bg-blue-500 text-white flex-1 w-36" onclick="window.location.href='EventReservationDetails.html'">
+                立即报名
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 模拟图片切换
+        document.addEventListener('DOMContentLoaded', function() {
+            const thumbnails = document.querySelectorAll('.gallery-thumbnail');
+            
+            thumbnails.forEach(thumbnail => {
+                thumbnail.addEventListener('click', function() {
+                    // 移除所有active类
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    // 给当前点击的缩略图添加active类
+                    this.classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

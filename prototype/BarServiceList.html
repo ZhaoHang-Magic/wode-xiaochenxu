@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒吧服务列表 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .bar-img {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .badge-bar {
+            background-color: #f9f0ff;
+            color: #722ed1;
+        }
+        .facility-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background-color: #f5f7fa;
+            color: #666;
+            font-size: 11px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .facility-tag i {
+            margin-right: 4px;
+            font-size: 10px;
+        }
+        .back-button {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 页面顶部导航 -->
+    <div class="flex items-center justify-center py-4 bg-white sticky top-44px" style="z-index: 30;">
+        <a href="discover.html" class="absolute left-4">
+            <i class="fas fa-chevron-left text-gray-600"></i>
+        </a>
+        <div class="text-center">
+            <h1 class="text-lg font-medium">酒吧服务</h1>
+        </div>
+    </div>
+
+    <!-- 页面内容 -->
+    <div class="main-content p-4">
+        <!-- 酒吧分类筛选 -->
+        <div class="flex mb-4 overflow-x-auto py-2" style="scrollbar-width: none; -ms-overflow-style: none;">
+            <div class="badge-bar rounded-full px-3 py-1 mr-2 text-xs whitespace-nowrap">所有酒吧</div>
+            <div class="bg-gray-100 text-gray-600 rounded-full px-3 py-1 mr-2 text-xs whitespace-nowrap">休闲酒吧</div>
+            <div class="bg-gray-100 text-gray-600 rounded-full px-3 py-1 mr-2 text-xs whitespace-nowrap">主题酒吧</div>
+            <div class="bg-gray-100 text-gray-600 rounded-full px-3 py-1 mr-2 text-xs whitespace-nowrap">酒廊</div>
+            <div class="bg-gray-100 text-gray-600 rounded-full px-3 py-1 mr-2 text-xs whitespace-nowrap">海景酒吧</div>
+        </div>
+
+        <!-- 酒吧列表 -->
+        <div class="bar-list">
+            <!-- 探索者酒吧 -->
+            <div class="card mb-5">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1572116469696-31de0f17cc34?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="bar-img" alt="探索者酒吧">
+                    <div class="absolute top-3 right-3">
+                        <div class="badge badge-bar">酒吧</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">探索者酒吧</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400 text-xs">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                                <span class="text-gray-500 text-xs ml-1">4.8 (296评价)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span>11层 · 北部</span>
+                        </div>
+                        <div class="text-xs text-purple-500 font-medium">不需预约</div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="mr-2"><i class="far fa-clock mr-1"></i> 18:00-凌晨2:00</span>
+                        <span><i class="fas fa-cocktail mr-1"></i> 鸡尾酒</span>
+                    </div>
+                    
+                    <!-- 酒吧设施标签 -->
+                    <div class="mt-3 flex flex-wrap">
+                        <div class="facility-tag">
+                            <i class="fas fa-music"></i> 现场音乐
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-glass-martini-alt"></i> 精品调酒
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-moon"></i> 深夜营业
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <div class="bg-blue-500 text-white text-sm py-2 rounded-lg">
+                            查看详情
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- cafe 1508+ -->
+            <div class="card mb-5">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1445116572660-236099ec97a0?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="bar-img" alt="cafe 1508+">
+                    <div class="absolute top-3 right-3">
+                        <div class="badge badge-bar">咖啡酒吧</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">Cafe 1508+</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400 text-xs">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="text-gray-500 text-xs ml-1">4.3 (182评价)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span>5层 · 中部</span>
+                        </div>
+                        <div class="text-xs text-purple-500 font-medium">不需预约</div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="mr-2"><i class="far fa-clock mr-1"></i> 07:00-23:00</span>
+                        <span><i class="fas fa-coffee mr-1"></i> 咖啡/酒精</span>
+                    </div>
+                    
+                    <!-- 酒吧设施标签 -->
+                    <div class="mt-3 flex flex-wrap">
+                        <div class="facility-tag">
+                            <i class="fas fa-wifi"></i> 高速Wi-Fi
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-coffee"></i> 精品咖啡
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-book"></i> 阅读角落
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <div class="bg-blue-500 text-white text-sm py-2 rounded-lg">
+                            查看详情
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 星灿俱乐部 -->
+            <div class="card mb-5">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1566417713940-fe7c737a9ef2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="bar-img" alt="星灿俱乐部">
+                    <div class="absolute top-3 right-3">
+                        <div class="badge badge-bar">夜店</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">星灿俱乐部</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400 text-xs">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                </div>
+                                <span class="text-gray-500 text-xs ml-1">4.9 (356评价)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span>12层 · 尾部</span>
+                        </div>
+                        <div class="text-xs text-purple-500 font-medium">入场凭票</div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="mr-2"><i class="far fa-clock mr-1"></i> 21:00-凌晨4:00</span>
+                        <span><i class="fas fa-cocktail mr-1"></i> 全系调酒</span>
+                    </div>
+                    
+                    <!-- 酒吧设施标签 -->
+                    <div class="mt-3 flex flex-wrap">
+                        <div class="facility-tag">
+                            <i class="fas fa-music"></i> DJ现场
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-glass-cheers"></i> VIP包厢
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-volume-up"></i> 专业音响
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <div class="bg-blue-500 text-white text-sm py-2 rounded-lg">
+                            查看详情
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 68号酒吧 -->
+            <div class="card mb-5">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="bar-img" alt="68号酒吧">
+                    <div class="absolute top-3 right-3">
+                        <div class="badge badge-bar">酒吧</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="font-medium">68号酒吧</div>
+                            <div class="flex items-center mt-1">
+                                <div class="flex text-yellow-400 text-xs">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="far fa-star"></i>
+                                </div>
+                                <span class="text-gray-500 text-xs ml-1">4.1 (156评价)</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center mt-2">
+                        <div class="text-xs text-gray-500">
+                            <i class="fas fa-map-marker-alt mr-1"></i>
+                            <span>6层 · 西部</span>
+                        </div>
+                        <div class="text-xs text-purple-500 font-medium">不需预约</div>
+                    </div>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span class="mr-2"><i class="far fa-clock mr-1"></i> 16:00-凌晨1:00</span>
+                        <span><i class="fas fa-beer mr-1"></i> 精酿啤酒</span>
+                    </div>
+                    
+                    <!-- 酒吧设施标签 -->
+                    <div class="mt-3 flex flex-wrap">
+                        <div class="facility-tag">
+                            <i class="fas fa-tv"></i> 体育直播
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-utensils"></i> 小食供应
+                        </div>
+                        <div class="facility-tag">
+                            <i class="fas fa-gamepad"></i> 桌游
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <div class="bg-blue-500 text-white text-sm py-2 rounded-lg">
+                            查看详情
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 更多酒吧可以继续添加... -->
+        </div>
+        
+        <!-- 查看更多按钮 -->
+        <div class="text-center text-blue-500 text-sm py-4">
+            加载更多酒吧 <i class="fas fa-chevron-down ml-1"></i>
+        </div>
+    </div>
+
+    <!-- 底部标签栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='home.html'">
+            <div class="tab-icon"><i class="fas fa-home"></i></div>
+            <div>首页</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='plaza.html'">
+            <div class="tab-icon"><i class="fas fa-compass"></i></div>
+            <div>广场</div>
+        </div>
+        <div class="tab-item active" onclick="window.location.href='discover.html'">
+            <div class="tab-icon"><i class="fas fa-search"></i></div>
+            <div>发现</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='order.html'">
+            <div class="tab-icon"><i class="fas fa-receipt"></i></div>
+            <div>订单</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <div class="tab-icon"><i class="fas fa-user"></i></div>
+            <div>我的</div>
+        </div>
+    </div>
+</body>
+</html> 

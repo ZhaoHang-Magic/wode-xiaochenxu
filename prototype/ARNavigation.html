@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR导航 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #000;
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        .ar-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            transform-style: preserve-3d;
+        }
+        .ar-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+        .ar-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+            pointer-events: none;
+            transform-style: preserve-3d;
+            perspective: 800px;
+        }
+        .ar-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+            transform-style: preserve-3d;
+        }
+        .ar-ui > * {
+            pointer-events: auto;
+        }
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            z-index: 30;
+            background-color: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+        }
+        .ar-controls {
+            position: absolute;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 30;
+        }
+        .ar-button {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 12px;
+            font-size: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .ar-button:active {
+            transform: scale(0.95) translateY(2px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+        }
+        .ar-back-button {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 40;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.2s;
+        }
+        .ar-back-button:active {
+            transform: scale(0.95);
+        }
+        .ar-direction {
+            position: absolute;
+            top: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            z-index: 30;
+        }
+        .ar-direction-card {
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 12px 20px;
+            color: white;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateZ(20px);
+            transition: transform 0.3s;
+        }
+        .ar-direction-card:hover {
+            transform: translateZ(30px) scale(1.02);
+        }
+        .distance-indicator {
+            background-color: rgba(13, 110, 253, 0.9);
+            border-radius: 20px;
+            padding: 4px 12px;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 12px;
+            box-shadow: 0 2px 6px rgba(13, 110, 253, 0.3);
+        }
+        .ar-marker {
+            position: absolute;
+            z-index: 15;
+            transform-style: preserve-3d;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) translateX(-50%) translateZ(0px); }
+            50% { transform: translateY(-10px) translateX(-50%) translateZ(20px); }
+            100% { transform: translateY(0px) translateX(-50%) translateZ(0px); }
+        }
+        .marker-pin {
+            width: 24px;
+            height: 24px;
+            background-color: #0d6efd;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 20px rgba(13, 110, 253, 0.5);
+            margin-bottom: 8px;
+            transform: translateZ(30px);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(13, 110, 253, 0.5); }
+            70% { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 15px rgba(13, 110, 253, 0); }
+            100% { box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3), 0 0 0 0 rgba(13, 110, 253, 0); }
+        }
+        .marker-line {
+            width: 4px;
+            height: 40px;
+            background: linear-gradient(to bottom, #0d6efd, transparent);
+            transform: translateZ(20px) rotateX(45deg);
+            transform-origin: top;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .marker-label {
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            white-space: nowrap;
+            margin-top: 8px;
+            transform: translateZ(25px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
+        }
+        .ar-floor-indicator {
+            position: absolute;
+            top: 50%;
+            right: 16px;
+            transform: translateY(-50%) translateZ(15px);
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 12px 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+        }
+        .floor-item {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin: 4px 0;
+            font-size: 12px;
+            font-weight: 500;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .floor-item.active {
+            background-color: #0d6efd;
+            transform: scale(1.1) translateZ(5px);
+            box-shadow: 0 2px 8px rgba(13, 110, 253, 0.5);
+        }
+        .ar-info-panel {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateZ(20px);
+            width: 90%;
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 25;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s;
+        }
+        .ar-info-panel:hover {
+            transform: translateX(-50%) translateZ(30px) scale(1.02);
+        }
+        .navigation-path {
+            stroke: #0d6efd;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke-dasharray: 15, 10;
+            stroke-dashoffset: 0;
+            fill: none;
+            filter: drop-shadow(0 0 8px rgba(13, 110, 253, 0.7));
+            animation: dash 1s linear infinite;
+        }
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -25;
+            }
+        }
+        .navigation-arrow {
+            fill: #0d6efd;
+            filter: drop-shadow(0 0 5px rgba(13, 110, 253, 0.7));
+            animation: glow 2s ease-in-out infinite;
+        }
+        @keyframes glow {
+            0% { filter: drop-shadow(0 0 5px rgba(13, 110, 253, 0.7)); }
+            50% { filter: drop-shadow(0 0 15px rgba(13, 110, 253, 0.9)); }
+            100% { filter: drop-shadow(0 0 5px rgba(13, 110, 253, 0.7)); }
+        }
+        .three-d-scene {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+            perspective: 800px;
+            pointer-events: none;
+        }
+        .grid-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(to right, rgba(30, 144, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(30, 144, 255, 0.1) 1px, transparent 1px);
+            background-size: 30px 30px;
+            transform: rotateX(60deg) translateZ(-100px) translateY(150px);
+            transform-style: preserve-3d;
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="ar-container">
+        <!-- AR背景（相机实时画面） -->
+        <img src="https://images.unsplash.com/photo-1574691250077-03a929faece5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" class="ar-background" alt="AR导航背景">
+        
+        <!-- 3D网格地面效果 -->
+        <div class="three-d-scene">
+            <div class="grid-floor"></div>
+        </div>
+        
+        <!-- AR叠加层（导航路径和标记） -->
+        <div class="ar-overlay">
+            <!-- 地点标记2：目的地 -->
+            <div class="ar-marker" style="top: 200px; left: 50%; animation-delay: 0.5s;">
+                <div class="marker-line"></div>
+                <div class="marker-pin"></div>
+                <div class="marker-label">
+                    <i class="fas fa-utensils mr-1"></i> 法式餐厅 (9层)
+                </div>
+            </div>
+            
+            <!-- 地点标记3：途经点 -->
+            <div class="ar-marker" style="top: 320px; left: 70%; animation-delay: 0.3s;">
+                <div class="marker-line"></div>
+                <div class="marker-pin" style="background-color: #f59e0b;"></div>
+                <div class="marker-label">
+                    <i class="fas fa-elevator mr-1"></i> 电梯
+                </div>
+            </div>
+        </div>
+        
+        <!-- AR界面元素 -->
+        <div class="ar-ui">
+            <!-- 状态栏 -->
+            <div class="status-bar">
+                <div class="time text-sm font-medium text-white">9:41</div>
+                <div class="status flex text-white">
+                    <i class="fas fa-signal mr-1"></i>
+                    <i class="fas fa-wifi mr-1"></i>
+                    <i class="fas fa-battery-full"></i>
+                </div>
+            </div>
+            
+            <!-- 返回按钮 -->
+            <div class="ar-back-button" onclick="window.history.back()">
+                <i class="fas fa-times"></i>
+            </div>
+            
+            <!-- 方向指示 -->
+            <div class="ar-direction">
+                <div class="ar-direction-card">
+                    <div>
+                        <div class="text-sm mb-1">前往：法式餐厅</div>
+                        <div class="text-xs text-gray-300">直行，然后在电梯处左转</div>
+                    </div>
+                    <div class="distance-indicator">
+                        <i class="fas fa-location-arrow mr-1"></i> 120米
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 预计到达时间 -->
+            <div style="position: absolute; top: 150px; left: 0; right: 0; display: flex; justify-content: center; z-index: 30;">
+                <div style="background-color: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); border-radius: 16px; padding: 10px 20px; color: white; display: flex; align-items: center; box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.1); transform: translateZ(20px);">
+                    <div>
+                        <div class="text-base font-medium"><i class="far fa-clock mr-2"></i>预计到达时间</div>
+                        <div class="text-2xl font-bold text-center mt-1">3分钟</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 楼层指示器 -->
+            <div class="ar-floor-indicator">
+                <div class="floor-item">12</div>
+                <div class="floor-item">11</div>
+                <div class="floor-item">10</div>
+                <div class="floor-item active">9</div>
+                <div class="floor-item">8</div>
+                <div class="floor-item">7</div>
+            </div>
+            
+            <!-- 信息面板 -->
+            <div class="ar-info-panel">
+                <div class="flex items-center">
+                    <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?ixlib=rb-1.2.1&auto=format&fit=crop&w=100&q=80" class="w-16 h-16 object-cover rounded-lg mr-3 shadow-md" alt="餐厅缩略图">
+                    <div class="flex-1">
+                        <h3 class="text-base font-medium">La Mer 法式餐厅</h3>
+                        <div class="flex items-center mt-1">
+                            <div class="flex text-yellow-400 text-xs">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                            </div>
+                            <span class="text-gray-500 text-xs ml-1">4.7</span>
+                        </div>
+                        <div class="flex items-center mt-1 text-xs text-gray-600">
+                            <span class="mr-2"><i class="fas fa-map-marker-alt mr-1"></i> 9层 · 中部</span>
+                            <span><i class="far fa-clock mr-1"></i> 营业中</span>
+                        </div>
+                    </div>
+                    <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-xs shadow-md">
+                        到达后开门
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部控制按钮 -->
+            <div class="ar-controls">
+                <div class="ar-button" style="background-color: #0d6efd; width: 70px; height: 70px; font-size: 28px; box-shadow: 0 0 20px rgba(13, 110, 253, 0.4), 0 4px 12px rgba(0, 0, 0, 0.15);">
+                    <i class="fas fa-compass"></i>
+                </div>
+                <div class="ar-button">
+                    <i class="fas fa-cog"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 模拟AR导航的交互功能
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加鼠标移动事件监听器以创建视差效果
+            document.addEventListener('mousemove', function(e) {
+                const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                
+                // 获取所有AR标记，应用视差效果
+                const markers = document.querySelectorAll('.ar-marker');
+                markers.forEach(marker => {
+                    const depth = parseFloat(marker.style.top) / 100; // 基于位置的深度
+                    marker.style.transform = `translateX(calc(-50% + ${xAxis * depth}px)) translateY(${yAxis * depth}px) translateZ(${20 + depth * 10}px)`;
+                });
+                
+                // 3D地板网格效果
+                const grid = document.querySelector('.grid-floor');
+                if (grid) {
+                    grid.style.transform = `rotateX(60deg) translateZ(-100px) translateY(150px) rotateY(${xAxis * 0.05}deg)`;
+                }
+            });
+        });
+    </script>
+</body>
+</html> 

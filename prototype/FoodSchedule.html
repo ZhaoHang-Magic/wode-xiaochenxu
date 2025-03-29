@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>美食日程表 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: rgba(0, 0, 0, 0.5);
+            -webkit-font-smoothing: antialiased;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .popup-container {
+            width: 90%;
+            max-width: 420px;
+            max-height: 85vh;
+            background-color: #fff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            animation: popup 0.3s ease-out;
+        }
+        @keyframes popup {
+            0% { transform: scale(0.9); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .popup-header {
+            padding: 16px;
+            border-bottom: 1px solid #f0f2f5;
+            position: relative;
+            background-color: #fff;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .popup-content {
+            padding: 16px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .close-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #666;
+            cursor: pointer;
+        }
+        .days-tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            padding: 0 16px;
+            margin-bottom: 16px;
+        }
+        .days-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        .day-tab {
+            flex: 0 0 auto;
+            padding: 8px 16px;
+            margin-right: 8px;
+            border-radius: 20px;
+            font-size: 14px;
+            background-color: #f0f2f5;
+            color: #666;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+        }
+        .day-tab.active {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .event-card {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 16px;
+            transition: transform 0.2s;
+        }
+        .event-card:active {
+            transform: scale(0.98);
+        }
+        .event-image {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+        .event-content {
+            padding: 16px;
+        }
+        .event-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        .event-time {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+        .event-location {
+            display: flex;
+            align-items: center;
+            color: #666;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+        .event-desc {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.4;
+        }
+        .event-highlight {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .section-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f2f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-container">
+        <div class="popup-header">
+            <h2 class="text-lg font-bold text-center">美食日程表</h2>
+            <div class="close-btn" onclick="parent.changePage('home.html')">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+
+        <div class="days-tabs">
+            <div class="day-tab active">
+                <span class="text-xs">周四</span>
+                <span class="font-medium">06/10</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周五</span>
+                <span class="font-medium">06/11</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周六</span>
+                <span class="font-medium">06/12</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周日</span>
+                <span class="font-medium">06/13</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周一</span>
+                <span class="font-medium">06/14</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周二</span>
+                <span class="font-medium">06/15</span>
+            </div>
+            <div class="day-tab">
+                <span class="text-xs">周三</span>
+                <span class="font-medium">06/16</span>
+            </div>
+        </div>
+
+        <div class="popup-content">
+            <div class="section-title">今日活动 (06月10日)</div>
+            
+            <!-- 法国美食节 -->
+            <div class="event-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1555126634-323283e090fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="event-image" alt="法国美食节">
+                    <div class="event-highlight" style="background-color: #e53e3e;">已预约</div>
+                </div>
+                <div class="event-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">法国美食节</h3>
+                        <div class="event-tag bg-red-100 text-red-600">晚餐</div>
+                    </div>
+                    <div class="event-time">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>18:00 - 21:00</span>
+                    </div>
+                    <div class="event-location">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>主甲板餐厅 (8层)</span>
+                    </div>
+                    <div class="event-desc">
+                        由法国星级主厨呈现的正宗法式美食盛宴，包含多款经典法式菜肴，配以精选法国葡萄酒。提前预约可获赠精美纪念品。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 咖啡品鉴课程 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="event-image" alt="咖啡品鉴课程">
+                <div class="event-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">咖啡品鉴课程</h3>
+                        <div class="event-tag bg-yellow-100 text-yellow-600">下午</div>
+                    </div>
+                    <div class="event-time">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>14:30 - 16:00</span>
+                    </div>
+                    <div class="event-location">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>星辰咖啡厅 (6层)</span>
+                    </div>
+                    <div class="event-desc">
+                        体验从咖啡豆到成品的完整制作过程，品尝来自世界各地的特色咖啡，学习咖啡拉花技巧。名额有限，请提前报名。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 亚洲风味早餐 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1553508978-314fe7d8cf77?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="event-image" alt="亚洲风味早餐">
+                <div class="event-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">亚洲风味早餐</h3>
+                        <div class="event-tag bg-green-100 text-green-600">早餐</div>
+                    </div>
+                    <div class="event-time">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>06:30 - 10:00</span>
+                    </div>
+                    <div class="event-location">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>海景自助餐厅 (5层)</span>
+                    </div>
+                    <div class="event-desc">
+                        提供多种亚洲风味早餐选择，包括日式、中式、韩式等特色早餐。现场有厨师根据您的喜好现做面点和煎蛋。
+                    </div>
+                </div>
+            </div>
+
+            <div class="section-title">即将到来 (06月11日)</div>
+
+            <!-- 海鲜自助晚餐 -->
+            <div class="event-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1565538420870-da08ff96a207?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="event-image" alt="海鲜自助晚餐">
+                    <div class="event-highlight" style="background-color: #3182ce;">可预约</div>
+                </div>
+                <div class="event-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">海鲜自助晚餐</h3>
+                        <div class="event-tag bg-blue-100 text-blue-600">晚餐</div>
+                    </div>
+                    <div class="event-time">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>17:30 - 20:30</span>
+                    </div>
+                    <div class="event-location">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>海洋餐厅 (7层)</span>
+                    </div>
+                    <div class="event-desc">
+                        每周五特别推出海鲜盛宴，新鲜捕捞的各类海鲜任您选择。包含生蚝、龙虾、帝王蟹和各式烹调海鲜的料理方式。
+                    </div>
+                </div>
+            </div>
+
+            <!-- 甜点制作课程 -->
+            <div class="event-card">
+                <img src="https://images.unsplash.com/photo-1547414368-ac947d00b91d?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80" class="event-image" alt="甜点制作课程">
+                <div class="event-content">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-bold">甜点制作课程</h3>
+                        <div class="event-tag bg-pink-100 text-pink-600">下午</div>
+                    </div>
+                    <div class="event-time">
+                        <i class="far fa-clock mr-2"></i>
+                        <span>15:00 - 17:00</span>
+                    </div>
+                    <div class="event-location">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        <span>甜品工坊 (6层)</span>
+                    </div>
+                    <div class="event-desc">
+                        学习制作精美法式马卡龙、提拉米苏等经典甜点，由专业甜点师全程指导。制作完成后可品尝自己的作品并带走。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

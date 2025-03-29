@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>酒吧详情 - 邮轮餐饮服务</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f7f8fa;
+            -webkit-font-smoothing: antialiased;
+        }
+        .status-bar {
+            background-color: #ffffff;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background-color: #ffffff;
+            box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+            display: flex;
+            z-index: 40;
+        }
+        .tab-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            color: #8a8a8a;
+        }
+        .tab-item.active {
+            color: #0d6efd;
+        }
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 2px;
+        }
+        .main-content {
+            padding-bottom: 60px;
+        }
+        .card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-right: 4px;
+        }
+        .badge-bar {
+            background-color: #f9f0ff;
+            color: #722ed1;
+        }
+        .badge-popular {
+            background-color: #fff3e6;
+            color: #fa8c16;
+        }
+        .badge-event {
+            background-color: #f6ffed;
+            color: #52c41a;
+        }
+        .gallery-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+        }
+        .gallery-thumbnail {
+            width: 60px;
+            height: 60px;
+            border-radius: 6px;
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .gallery-thumbnail.active {
+            border: 2px solid #722ed1;
+        }
+        .drink-scroll {
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 16px 0;
+        }
+        .drink-card {
+            display: inline-block;
+            width: 140px;
+            margin-right: 12px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .drink-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        .time-slot {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background-color: #f0f2f5;
+            color: #666;
+            font-size: 12px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+        .time-slot.available {
+            background-color: #e6f7ff;
+            color: #0d6efd;
+            border: 1px solid #91d5ff;
+        }
+        .time-slot.booked {
+            background-color: #f5f5f5;
+            color: #bfbfbf;
+            text-decoration: line-through;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .nav-tab {
+            padding: 12px 0;
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+        .nav-tab.active {
+            color: #722ed1;
+            font-weight: 500;
+            border-bottom: 2px solid #722ed1;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .storage-indicator {
+            height: 8px;
+            border-radius: 4px;
+            background-color: #f9f0ff;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .storage-progress {
+            height: 100%;
+            background-color: #722ed1;
+            border-radius: 4px;
+        }
+        .event-card {
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .event-img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- 状态栏 -->
+    <div class="status-bar">
+        <div class="time text-sm font-medium">9:41</div>
+        <div class="status flex">
+            <i class="fas fa-signal mr-1"></i>
+            <i class="fas fa-wifi mr-1"></i>
+            <i class="fas fa-battery-full"></i>
+        </div>
+    </div>
+
+    <!-- 酒吧封面图 -->
+    <div class="relative">
+        <img src="https://images.unsplash.com/photo-1572116469696-31de0f17cc34?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-60 object-cover" alt="酒吧封面">
+        <div class="absolute top-4 left-4">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center" onclick="window.history.back()">
+                <i class="fas fa-chevron-left text-white"></i>
+            </div>
+        </div>
+        <div class="absolute top-4 right-4 flex">
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center mr-2">
+                <i class="fas fa-share-alt text-white"></i>
+            </div>
+            <div class="w-8 h-8 bg-black bg-opacity-30 rounded-full flex items-center justify-center">
+                <i class="far fa-heart text-white"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- 主要内容 -->
+    <div class="main-content bg-white">
+        <!-- 酒吧基本信息 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h1 class="text-xl font-medium">探索者酒吧</h1>
+                    <div class="flex items-center mt-1">
+                        <div class="flex text-yellow-400 text-sm">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="text-gray-500 text-sm ml-1">4.8 (296条点评)</span>
+                    </div>
+                </div>
+                <div class="flex flex-col items-end">
+                    <div class="flex mb-1">
+                        <span class="badge badge-bar">高级酒吧</span>
+                        <span class="badge badge-popular">热门</span>
+                    </div>
+                    <span class="text-xs text-gray-500">11层 · 北部</span>
+                </div>
+            </div>
+            
+            <!-- 营业时间和特色 -->
+            <div class="mt-3">
+                <div class="flex items-center text-gray-500 text-sm">
+                    <i class="far fa-clock mr-2"></i>
+                    <span><span class="font-medium">营业时间</span> · 18:00-凌晨2:00</span>
+                </div>
+                <div class="flex items-center text-gray-500 text-sm mt-1">
+                    <i class="fas fa-cocktail mr-2"></i>
+                    <span>精品调酒 · 优质烈酒</span>
+                </div>
+            </div>
+            
+            <!-- 预约按钮 -->
+            <div class="mt-4">
+                <button class="w-full bg-purple-600 text-white py-3 rounded-lg font-medium">
+                    立即预约
+                </button>
+            </div>
+            
+            <!-- AR导航按钮 -->
+            <div class="mt-3">
+                <div class="bg-green-500 text-white py-3 rounded-lg font-medium text-center" onclick="window.location.href='ARNavigation.html'">
+                    <i class="fas fa-map-marked-alt mr-1"></i> AR导航
+                </div>
+            </div>
+        </div>
+        
+        <!-- 酒品套餐广告 -->
+        <div class="p-4 border-b">
+            <div class="relative rounded-lg overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-36 object-cover" alt="酒品套餐">
+                <div class="absolute inset-0 bg-black bg-opacity-30 flex flex-col items-start justify-end p-4">
+                    <div class="bg-purple-600 text-white text-xs px-2 py-1 rounded-sm mb-2">限时优惠</div>
+                    <h3 class="text-white font-bold text-lg">环球品鉴套餐</h3>
+                    <p class="text-white text-sm">5款精选烈酒品鉴 + 专业调酒师讲解</p>
+                    <div class="mt-2 flex items-center">
+                        <span class="text-white font-bold">¥268</span>
+                        <span class="text-white text-xs line-through ml-2">¥358</span>
+                        <button class="ml-auto bg-white text-purple-600 text-xs font-medium px-3 py-1 rounded">立即抢购</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 精选饮品 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-lg font-medium">精选饮品</h2>
+                <a href="#" class="text-sm text-purple-600">查看全部 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+            
+            <div class="drink-scroll">
+                <div class="drink-card">
+                    <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="drink-img" alt="探索者特调">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">探索者特调</div>
+                        <div class="text-xs text-gray-500 mt-1">¥88</div>
+                    </div>
+                </div>
+                
+                <div class="drink-card">
+                    <img src="https://images.unsplash.com/photo-1470337458703-46ad1756a187?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="drink-img" alt="蓝色海岸">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">蓝色海岸</div>
+                        <div class="text-xs text-gray-500 mt-1">¥68</div>
+                    </div>
+                </div>
+                
+                <div class="drink-card">
+                    <img src="https://images.unsplash.com/photo-1482349212652-744925b1e2c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="drink-img" alt="12年单一麦芽">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">12年单一麦芽</div>
+                        <div class="text-xs text-gray-500 mt-1">¥128</div>
+                    </div>
+                </div>
+                
+                <div class="drink-card">
+                    <img src="https://images.unsplash.com/photo-1536935338788-846bb9981813?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="drink-img" alt="莫吉托">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">莫吉托</div>
+                        <div class="text-xs text-gray-500 mt-1">¥58</div>
+                    </div>
+                </div>
+                
+                <div class="drink-card">
+                    <img src="https://images.unsplash.com/photo-1586338211598-e2d64cf97e28?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" class="drink-img" alt="老式鸡尾酒">
+                    <div class="p-2">
+                        <div class="text-sm font-medium truncate">老式鸡尾酒</div>
+                        <div class="text-xs text-gray-500 mt-1">¥78</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 存酒余量 -->
+        <div class="p-4 border-b">
+            <h2 class="text-lg font-medium mb-3">存酒余量</h2>
+            
+            <div class="bg-purple-50 p-3 rounded-lg mb-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-wine-bottle text-purple-600 mr-2"></i>
+                        <div class="text-sm font-medium">尊尼获加蓝牌</div>
+                    </div>
+                    <div class="text-xs text-purple-600">余量: 70%</div>
+                </div>
+                <div class="storage-indicator mt-2">
+                    <div class="storage-progress" style="width: 70%"></div>
+                </div>
+            </div>
+            
+            <div class="bg-purple-50 p-3 rounded-lg mb-4">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-wine-bottle text-purple-600 mr-2"></i>
+                        <div class="text-sm font-medium">人头马VSOP</div>
+                    </div>
+                    <div class="text-xs text-purple-600">余量: 45%</div>
+                </div>
+                <div class="storage-indicator mt-2">
+                    <div class="storage-progress" style="width: 45%"></div>
+                </div>
+            </div>
+            
+            <div class="bg-purple-50 p-3 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <i class="fas fa-wine-bottle text-purple-600 mr-2"></i>
+                        <div class="text-sm font-medium">绝对伏特加</div>
+                    </div>
+                    <div class="text-xs text-purple-600">余量: 85%</div>
+                </div>
+                <div class="storage-indicator mt-2">
+                    <div class="storage-progress" style="width: 85%"></div>
+                </div>
+            </div>
+            
+            <div class="mt-3 flex justify-between">
+                <span class="text-sm text-gray-500">共12款存酒</span>
+                <a href="#" class="text-sm text-purple-600">查看全部 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+        </div>
+        
+        <!-- 酒吧活动 -->
+        <div class="p-4 border-b">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-medium">近期活动</h2>
+                <a href="#" class="text-sm text-purple-600">全部活动 <i class="fas fa-chevron-right text-xs"></i></a>
+            </div>
+            
+            <div class="event-card">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1485872299829-c673f5194813?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="event-img" alt="调酒师表演夜">
+                    <div class="absolute top-2 left-2">
+                        <div class="badge badge-event">进行中</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <h3 class="font-medium">调酒师表演夜</h3>
+                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                        <i class="far fa-calendar-alt mr-1"></i>
+                        <span>今晚 20:00-22:00</span>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center">
+                        <div class="text-xs text-gray-600">已有68人报名</div>
+                        <button class="bg-purple-600 text-white text-xs px-3 py-1 rounded">立即报名</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="event-card mt-3">
+                <div class="relative">
+                    <img src="https://images.unsplash.com/photo-1516997121675-4c2d1684aa3e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="event-img" alt="爵士音乐之夜">
+                    <div class="absolute top-2 left-2">
+                        <div class="badge badge-popular">热门</div>
+                    </div>
+                </div>
+                <div class="p-3">
+                    <h3 class="font-medium">爵士音乐之夜</h3>
+                    <div class="flex items-center mt-1 text-xs text-gray-500">
+                        <i class="far fa-calendar-alt mr-1"></i>
+                        <span>明天 19:30-22:30</span>
+                    </div>
+                    <div class="mt-2 flex justify-between items-center">
+                        <div class="text-xs text-gray-600">已有104人报名</div>
+                        <button class="bg-purple-600 text-white text-xs px-3 py-1 rounded">立即报名</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 酒吧介绍 -->
+        <div class="p-4 border-b">
+            <h2 class="text-lg font-medium mb-2">酒吧介绍</h2>
+            <p class="text-sm text-gray-600 leading-relaxed">
+                探索者酒吧位于邮轮11层北部，是一家高级鸡尾酒吧，提供精致的调酒服务和优质的烈酒选择。我们的调酒师均受过专业训练，能够为您调制经典与创新的鸡尾酒。酒吧每晚都有不同主题的活动，包括调酒表演、爵士音乐会和品酒会等。独特的海景视野和舒适的环境，让您在享用美酒的同时，感受无与伦比的海上体验。
+            </p>
+            
+            <!-- 特色标签 -->
+            <div class="flex flex-wrap mt-3">
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-music mr-1 text-purple-500"></i>
+                    <span>现场音乐</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-glass-martini-alt mr-1 text-purple-500"></i>
+                    <span>精品调酒</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-wine-bottle mr-1 text-purple-500"></i>
+                    <span>存酒服务</span>
+                </div>
+                <div class="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full mr-2 mb-2">
+                    <i class="fas fa-moon mr-1 text-purple-500"></i>
+                    <span>深夜营业</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 位置信息 -->
+        <div class="p-4">
+            <h2 class="text-lg font-medium mb-3">酒吧位置</h2>
+            <div class="relative rounded-lg overflow-hidden">
+                <img src="https://images.unsplash.com/photo-1577979749830-f1d742b96791?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" class="w-full h-48 object-cover" alt="酒吧位置图">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="bg-purple-600 text-white px-3 py-1 rounded-full text-sm">
+                        <i class="fas fa-map-marker-alt mr-1"></i> 11层北部
+                    </div>
+                </div>
+            </div>
+            <div class="flex justify-between mt-3">
+                <button class="flex-1 bg-purple-600 text-white py-2 rounded-lg mr-2 flex items-center justify-center">
+                    <i class="fas fa-map-marked-alt mr-1"></i> 查看位置
+                </button>
+                <button class="flex-1 bg-white border border-purple-600 text-purple-600 py-2 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-directions mr-1"></i> 导航前往
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部标签栏 -->
+    <div class="tab-bar">
+        <div class="tab-item" onclick="window.location.href='home.html'">
+            <div class="tab-icon"><i class="fas fa-home"></i></div>
+            <div>首页</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='plaza.html'">
+            <div class="tab-icon"><i class="fas fa-compass"></i></div>
+            <div>广场</div>
+        </div>
+        <div class="tab-item active" onclick="window.location.href='discover.html'">
+            <div class="tab-icon"><i class="fas fa-search"></i></div>
+            <div>发现</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='order.html'">
+            <div class="tab-icon"><i class="fas fa-receipt"></i></div>
+            <div>订单</div>
+        </div>
+        <div class="tab-item" onclick="window.location.href='profile.html'">
+            <div class="tab-icon"><i class="fas fa-user"></i></div>
+            <div>我的</div>
+        </div>
+    </div>
+</body>
+</html> 
